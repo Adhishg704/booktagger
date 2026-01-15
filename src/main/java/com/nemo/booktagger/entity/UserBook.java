@@ -45,7 +45,7 @@ public class UserBook {
     @Column(name = "status")
     private ReadingStatus status;
 
-    @Column(name = "rating", precision = 3, scale = 2)
+    @Column(name = "rating", precision = 3)
     private Double rating;
 
     public UserBook(User user, Book book, Integer yearRead, ReadingStatus status, Double rating) {
