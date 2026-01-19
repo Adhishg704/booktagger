@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User createUser(String username, String email) {
         if(!isUsernameValid(username)) {
             throw new IllegalArgumentException("Username is not valid");
