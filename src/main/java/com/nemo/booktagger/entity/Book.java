@@ -39,15 +39,11 @@ public class Book {
     @Column(name = "year_published")
     private String yearPublished;
 
-    @Column(name = "status")
-    private String status;
-
-    public Book(String title, String author, String description, long isbn, String yearPublished, String status) {
+    public Book(String title, String author, String description, long isbn, String yearPublished) {
         this.title = title;
         this.author = author;
         this.description = description;
         this.isbn = isbn;
         this.yearPublished = yearPublished;
-        this.status = status;
     }
 }

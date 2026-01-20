@@ -132,7 +132,8 @@ public class UserServiceImpl implements UserService {
         if(newEmail == null || newEmail.isBlank()) {
             return false;
         }
-        String regex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        String regex =
+                "^(?!.*\\.\\.)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
         return newEmail.matches(regex);
     }
 }
