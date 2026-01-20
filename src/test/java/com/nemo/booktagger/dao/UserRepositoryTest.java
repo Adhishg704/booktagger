@@ -28,7 +28,7 @@ public class UserRepositoryTest {
     }
 
     private void createUserData() {
-        testUser = UserFactory.createUser("test", "test@example.com");
+        testUser = UserFactory.createUser("test_1234", "test@example.com");
         userRepository.save(testUser);
     }
 
@@ -36,7 +36,7 @@ public class UserRepositoryTest {
     public void testFindUsernameByIdReturnsUsernameIfUserExists() {
         Optional<String> username = userRepository.findUsernameById(testUser.getId());
         assertTrue(username.isPresent());
-        assertEquals("test", username.get(), "Unexpected username for test user");
+        assertEquals(testUser.getUsername(), username.get(), "Unexpected username for test user");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class UserRepositoryTest {
     public void testFindEmailByIdReturnsEmailIfUserExists() {
         Optional<String> email = userRepository.findEmailById(testUser.getId());
         assertTrue(email.isPresent());
-        assertEquals("test@example.com", email.get(), "Unexpected email for test user");
+        assertEquals(testUser.getEmail(), email.get(), "Unexpected email for test user");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UserRepositoryTest {
 
     @Test
     public void testExistsByUsernameReturnsTrueIfUserExists() {
-        assertTrue(userRepository.existsByUsername("test"));
+        assertTrue(userRepository.existsByUsername(testUser.getUsername()));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class UserRepositoryTest {
 
     @Test
     public void testExistsByEmailReturnsTrueIfUserExists() {
-        assertTrue(userRepository.existsByEmail("test@example.com"));
+        assertTrue(userRepository.existsByEmail(testUser.getEmail()));
     }
 
     @Test
