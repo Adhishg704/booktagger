@@ -1,6 +1,7 @@
 package com.nemo.booktagger.dao;
 
 import com.nemo.booktagger.entity.User;
+import com.nemo.booktagger.factory.UserFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,7 @@ public class UserRepositoryTest {
     }
 
     private void createUserData() {
-        testUser = new User();
-        testUser.setUsername("test");
-        testUser.setEmail("test@example.com");
-
+        testUser = UserFactory.createUser("test", "test@example.com");
         userRepository.save(testUser);
     }
 
