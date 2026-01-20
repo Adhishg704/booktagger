@@ -5,7 +5,11 @@ import com.nemo.booktagger.entity.Book;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookFactory {
+public final class BookFactory {
+    private BookFactory() {
+
+    }
+
     private static int counter = 0;
 
     public static Book createBook(String title, String author, String description, long isbn, String year) {

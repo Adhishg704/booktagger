@@ -5,7 +5,12 @@ import com.nemo.booktagger.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserFactory {
+public final class UserFactory {
+
+    private UserFactory() {
+
+    }
+
     private static int counter = 0;
 
     public static User createUser(String username, String email) {

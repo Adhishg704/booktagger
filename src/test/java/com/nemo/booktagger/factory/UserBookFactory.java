@@ -8,7 +8,11 @@ import com.nemo.booktagger.enums.ReadingStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserBookFactory {
+public final class UserBookFactory {
+    private UserBookFactory() {
+
+    }
+
     public static UserBook createUserBook(User user, Book book, int yearRead, ReadingStatus status, double rating) {
         return new UserBook(user, book, yearRead, status, rating);
     }
