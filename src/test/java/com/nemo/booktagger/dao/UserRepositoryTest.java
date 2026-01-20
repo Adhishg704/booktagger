@@ -1,10 +1,8 @@
 package com.nemo.booktagger.dao;
 
-import com.nemo.booktagger.entity.User;
-import com.nemo.booktagger.factory.UserFactory;
+import com.nemo.booktagger.base.BaseRepositoryTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,20 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class UserRepositoryTest {
-    @Autowired
-    private UserRepository userRepository;
-
-    private User testUser;
+public class UserRepositoryTest extends BaseRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        createUserData();
-    }
-
-    private void createUserData() {
-        testUser = UserFactory.createUser("test_1234", "test@example.com");
-        userRepository.save(testUser);
+        setUpUserRepositoryData();
     }
 
     @Test
