@@ -20,7 +20,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void testCountByUserIdR() {
+    public void testCountByUserId() {
         assertEquals(
                 10,
                 userBookRepository.countByUser_Id(testUser.getId()),
