@@ -74,14 +74,72 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
         Book firstBook = testBooks.getFirst();
         List<UserBook> userBooks = userBookRepository.findByUser_IdAndBook_YearPublished(testUser.getId(),
                 firstBook.getYearPublished());
-        assertEquals(testUserBooks.size(), userBooks.size(), "User should own all the books released in 2025");
+
+        assertEquals(testUserBooks.size(), userBooks.size(), "User should own all the books released in " +
+                firstBook.getYearPublished());
+        userBooks.forEach(userBook -> {
+            assertEquals(
+                    testUser.getId(),
+                    userBook.getUser().getId(),
+                    "User id mismatch"
+            );
+
+            assertEquals(
+                    firstBook.getYearPublished(),
+                    userBook.getBook().getYearPublished(),
+                    "Year published mismatch"
+            );
+        });
+
     }
 
     @Test
     public void testFindByUserIdAndYearRead() {
+        Integer yearRead = testUserBooks.getFirst().getYearRead();
         List<UserBook> userBooks = userBookRepository.findByUser_IdAndYearRead(testUser.getId(),
-                testUserBooks.getFirst().getYearRead());
-        assertEquals(testUserBooks.size(), userBooks.size(), "All test books read in 2025");
+                yearRead);
+
+        assertEquals(testUserBooks.size(), userBooks.size(), "All test books read in " + yearRead);
+        userBooks.forEach(userBook -> {
+            assertEquals(
+                    testUser.getId(),
+                    userBook.getUser().getId(),
+                    "User id mismatch"
+            );
+
+            assertEquals(
+                    yearRead,
+                    userBook.getYearRead(),
+                    "Year published mismatch"
+            );
+        });
+    }
+
+    @Test
+    public void testFindByUserIdAndStatus() {
+        List<UserBook> userBooksRead = userBookRepository.findByUser_IdAndStatus(testUser.getId(),
+                ReadingStatus.READ);
+        List<UserBook> userBooksTBR = userBookRepository.findByUser_IdAndStatus(testUser.getId(),
+                ReadingStatus.TO_READ);
+        List<UserBook> userBooksDNF= userBookRepository.findByUser_IdAndStatus(testUser.getId(),
+                ReadingStatus.DNF);
+
+        assertEquals(testUserBooks.size(), userBooksRead.size(), "All user books read");
+        assertEquals(0, userBooksTBR.size(), "No user books in TBR");
+        assertEquals(0, userBooksDNF.size(), "No user books in DNF");
+        userBooksRead.forEach(userBook -> {
+            assertEquals(
+                    testUser.getId(),
+                    userBook.getUser().getId(),
+                    "User id mismatch"
+            );
+
+            assertEquals(
+                    ReadingStatus.READ,
+                    userBook.getStatus(),
+                    "Status mismatch"
+            );
+        });
     }
 
     @Test
@@ -90,9 +148,8 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
         List<UserBook> userBooks = userBookRepository.findByUser_IdAndBook_Author(testUser.getId(),
                 firstBook.getAuthor());
 
-        assertEquals(1, userBooks.size(), "Only one author for each book");
+        assertEquals(1, userBooks.size(), "User should have exactly one book by this author");
         Book userbook = userBooks.getFirst().getBook();
         assertEquals(firstBook.getAuthor(), userbook.getAuthor(), "Unexpected author");
-
     }
 }
