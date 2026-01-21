@@ -26,7 +26,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testCountByUserId() {
         assertEquals(
-                10,
+                testUserBooks.size(),
                 userBookRepository.countByUser_Id(testUser.getId()),
                 "Unexpected number of user books"
         );
@@ -35,7 +35,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testCountByUserIdAndYearRead() {
         assertEquals(
-                10,
+                testUserBooks.size(),
                 userBookRepository.countByUser_IdAndYearRead(testUser.getId(), 2025),
                 "Unexpected number of user books in 2025"
         );
@@ -44,7 +44,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testCountByUserIdAndStatus() {
         assertEquals(
-                10,
+                testUserBooks.size(),
                 userBookRepository.countByUser_IdAndStatus(testUser.getId(), ReadingStatus.READ),
                 "Unexpected number of user books read"
         );
@@ -53,7 +53,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testCountByUserIdAndStatusAndYearRead() {
         assertEquals(
-                10,
+                testUserBooks.size(),
                 userBookRepository.countByUser_IdAndStatusAndYearRead(testUser.getId(), ReadingStatus.READ, 2025),
                 "Unexpected number of user books read in 2025"
         );
@@ -74,7 +74,14 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
         Book firstBook = testBooks.getFirst();
         List<UserBook> userBooks = userBookRepository.findByUser_IdAndBook_YearPublished(testUser.getId(),
                 firstBook.getYearPublished());
-        assertEquals(10, userBooks.size(), "User should own all the books released in 2025");
+        assertEquals(testUserBooks.size(), userBooks.size(), "User should own all the books released in 2025");
+    }
+
+    @Test
+    public void testFindByUserIdAndYearRead() {
+        List<UserBook> userBooks = userBookRepository.findByUser_IdAndYearRead(testUser.getId(),
+                testUserBooks.getFirst().getYearRead());
+        assertEquals(testUserBooks.size(), userBooks.size(), "All test books read in 2025");
     }
 
     @Test
