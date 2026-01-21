@@ -53,6 +53,10 @@ public class BaseRepositoryTest {
         createOneUserData();
     }
 
+    protected void setUpBookRepositoryData() {
+        createBookData();
+    }
+
     protected void setUpBookTagRepositoryData() {
         createOneUserData();
         createBookData();
