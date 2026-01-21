@@ -23,7 +23,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void findTitleById() {
+    public void testFindTitleById() {
         Book firstBook = testBooks.getFirst();
         Optional<String> expectedBookTitle = bookRepository.findTitleById(firstBook.getId());
         assertTrue(expectedBookTitle.isPresent());
@@ -31,7 +31,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void findAuthorById() {
+    public void testFindAuthorById() {
         Book firstBook = testBooks.getFirst();
         Optional<String> expectedBookAuthor = bookRepository.findAuthorById(firstBook.getId());
         assertTrue(expectedBookAuthor.isPresent());
@@ -39,7 +39,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void findDescriptionById() {
+    public void testFindDescriptionById() {
         Book firstBook = testBooks.getFirst();
         Optional<String> expectedBookDescription = bookRepository.findDescriptionById(firstBook.getId());
         assertTrue(expectedBookDescription.isPresent());
@@ -47,7 +47,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void findIsbnById() {
+    public void testFindIsbnById() {
         Book firstBook = testBooks.getFirst();
         Optional<Long> expectedBookIsbn = bookRepository.findIsbnById(firstBook.getId());
         assertTrue(expectedBookIsbn.isPresent());
@@ -55,10 +55,17 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
-    public void findYearPublishedById() {
+    public void testFindYearPublishedById() {
         Book firstBook = testBooks.getFirst();
         Optional<String> expectedBookYearPublished = bookRepository.findYearPublishedById(firstBook.getId());
         assertTrue(expectedBookYearPublished.isPresent());
         assertEquals(firstBook.getYearPublished(), expectedBookYearPublished.get(), "Wrong title returned by repository");
+    }
+
+    @Test
+    public void testExistsByIsbn() {
+        assertFalse(
+                bookRepository.existsByIsbn(1000000069L)
+        );
     }
 }

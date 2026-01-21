@@ -14,17 +14,16 @@ public interface BookService {
     String getAuthorById(Integer bookId);
     String getDescriptionById(Integer bookId);
     long getIsbnById(Integer bookId);
-    Integer getYearPublishedById(Integer bookId);
+    String getYearPublishedById(Integer bookId);
 
-    Book addBook(String title, String author, String description, long isbn, Integer yearPublished);
+    Book addBook(String title, String author, String description, long isbn, String yearPublished);
 
     long getNumberOfUsersWhoOwnTheBook(Integer bookId);
-    List<UserBook> getUserBooksPublishedInAParticularYear(Integer userId, Integer yearPublished);
     List<BookTag> getTagsAssociatedWithBookForUser(Integer userId, Integer bookId);
 
     List<UserBook> getUserBooksByAuthor(Integer userId, String author);
     List<UserBook> getUserBooksByTitle(Integer userId, String titlePart);
-    List<UserBook> getUserBooksByYearPublished(Integer userId, Integer year);
+    List<UserBook> getUserBooksByYearPublished(Integer userId, String year);
     List<UserBook> getUserBooksByYearRead(Integer userId, Integer year);
     List<UserBook> getUserBooksByRatingRange(Integer userId, double minRating, double maxRating);
     List<UserBook> getBooksReadByUser(Integer userId);
