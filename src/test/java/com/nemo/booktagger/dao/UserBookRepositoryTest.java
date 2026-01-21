@@ -76,4 +76,16 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
                 firstBook.getYearPublished());
         assertEquals(10, userBooks.size(), "User should own all the books released in 2025");
     }
+
+    @Test
+    public void testFindByUserIdAndBookAuthor() {
+        Book firstBook = testBooks.getFirst();
+        List<UserBook> userBooks = userBookRepository.findByUser_IdAndBook_Author(testUser.getId(),
+                firstBook.getAuthor());
+
+        assertEquals(1, userBooks.size(), "Only one author for each book");
+        Book userbook = userBooks.getFirst().getBook();
+        assertEquals(firstBook.getAuthor(), userbook.getAuthor(), "Unexpected author");
+
+    }
 }

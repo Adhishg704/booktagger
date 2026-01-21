@@ -23,4 +23,6 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer> {
             Integer userId,
             String yearPublished
     );
+
+    List<UserBook> findByUser_IdAndBook_Author(Integer userId, String author);
 }
