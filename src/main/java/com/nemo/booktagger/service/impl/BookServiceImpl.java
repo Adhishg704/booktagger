@@ -1,0 +1,150 @@
+package com.nemo.booktagger.service.impl;
+
+import com.nemo.booktagger.dao.BookRepository;
+import com.nemo.booktagger.dao.BookTagRepository;
+import com.nemo.booktagger.dao.UserBookRepository;
+import com.nemo.booktagger.entity.Book;
+import com.nemo.booktagger.entity.BookTag;
+import com.nemo.booktagger.entity.UserBook;
+import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.service.BookService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+
+import java.util.List;
+
+public class BookServiceImpl implements BookService {
+
+    private final BookRepository bookRepository;
+    private final UserBookRepository userBookRepository;
+    private final BookTagRepository bookTagRepository;
+
+    public BookServiceImpl(BookRepository bookRepository, UserBookRepository userBookRepository,
+                           BookTagRepository bookTagRepository) {
+        this.bookRepository = bookRepository;
+        this.userBookRepository = userBookRepository;
+        this.bookTagRepository = bookTagRepository;
+    }
+
+    @Override
+    public Book getBookById(Integer bookId) {
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    public String getTitleById(Integer bookId) {
+        return bookRepository.findTitleById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    public String getAuthorById(Integer bookId) {
+        return bookRepository.findAuthorById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    public String getDescriptionById(Integer bookId) {
+        return bookRepository.findDescriptionById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    public long getIsbnById(Integer bookId) {
+        return bookRepository.findIsbnById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    public String getYearPublishedById(Integer bookId) {
+        return bookRepository.findYearPublishedById(bookId)
+                .orElseThrow(() -> bookNotFound(bookId));
+    }
+
+    @Override
+    @Transactional
+    public Book addBook(String title, String author, String description, long isbn, String yearPublished) {
+        if(bookRepository.existsByIsbn(isbn)) {
+            throw new RuntimeException("Book already exists");
+        }
+        Book book = new Book(
+                title,
+                author,
+                description,
+                isbn,
+                yearPublished
+        );
+        bookRepository.save(book);
+        return book;
+    }
+
+    @Override
+    public long getNumberOfUsersWhoOwnTheBook(Integer bookId) {
+        return userBookRepository.countByBook_Id(bookId);
+    }
+
+    @Override
+    public List<BookTag> getTagsAssociatedWithBookForUser(Integer userId, Integer bookId) {
+        return bookTagRepository.findByUser_IdAndBook_Id(userId, bookId);
+    }
+
+    @Override
+    public List<UserBook> getUserBooksByAuthor(Integer userId, String author) {
+        return userBookRepository.findByUser_IdAndBook_Author(userId, author);
+    }
+
+    @Override
+    public List<UserBook> getUserBooksByTitle(Integer userId, String titlePart) {
+        return List.of();
+    }
+
+    @Override
+    public List<UserBook> getUserBooksByYearPublished(Integer userId, String year) {
+        return userBookRepository.findByUser_IdAndBook_YearPublished(userId, year);
+    }
+
+    @Override
+    public List<UserBook> getUserBooksByYearRead(Integer userId, Integer year) {
+        return userBookRepository.findByUser_IdAndYearRead(userId, year);
+    }
+
+    @Override
+    public List<UserBook> getUserBooksByRatingRange(Integer userId, double minRating, double maxRating) {
+        return List.of();
+    }
+
+    @Override
+    public List<UserBook> getBooksReadByUser(Integer userId) {
+        return userBookRepository.findByUser_IdAndStatus(userId, ReadingStatus.READ);
+    }
+
+    @Override
+    public List<UserBook> getBooksUserDidNotFinish(Integer userId) {
+        return userBookRepository.findByUser_IdAndStatus(userId, ReadingStatus.DNF);
+    }
+
+    @Override
+    public List<UserBook> getBooksUserWantsToRead(Integer userId) {
+        return userBookRepository.findByUser_IdAndStatus(userId, ReadingStatus.TO_READ);
+    }
+
+    @Override
+    public UserBook updateUserBookStatus(Integer userId, Integer bookId, ReadingStatus status) {
+        return null;
+    }
+
+    @Override
+    public UserBook updateUserBookRating(Integer userId, Integer bookId, double rating) {
+        return null;
+    }
+
+    @Override
+    public void deleteUserBook(Integer userId, Integer bookId) {
+
+    }
+
+    private EntityNotFoundException bookNotFound(Integer bookId) {
+        return new EntityNotFoundException("Book id " + bookId + " not found");
+    }
+}
