@@ -77,6 +77,31 @@ public class BookServiceImplTest {
     }
 
     @Test
+    public void testGetTitleByIdReturnsTitleForExistingBook() {
+        when(bookRepository.findTitleById(existingBookId))
+                .thenReturn(Optional.of(book.getTitle()));
+
+        String author = bookService.getTitleById(existingBookId);
+
+        assertEquals(book.getTitle(), author);
+        verify(bookRepository, times(1)).findTitleById(existingBookId);
+    }
+
+    @Test
+    public void testGetTitleByIdThrowsExceptionForNonExistingBook() {
+        when(bookRepository.findTitleById(nonExistingBookId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
+                () -> bookService.getTitleById(nonExistingBookId)
+        );
+
+        assertEquals("Book id " + nonExistingBookId + " not found", ex.getMessage());
+        verify(bookRepository, times(1)).findTitleById(nonExistingBookId);
+    }
+
+    @Test
     public void testGetAuthorByIdReturnsAuthorForExistingBook() {
         when(bookRepository.findAuthorById(existingBookId))
                 .thenReturn(Optional.of(book.getAuthor()));
