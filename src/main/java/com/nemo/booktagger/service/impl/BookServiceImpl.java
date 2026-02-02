@@ -10,9 +10,11 @@ import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.service.BookService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
