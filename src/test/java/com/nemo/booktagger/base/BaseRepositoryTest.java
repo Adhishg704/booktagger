@@ -43,6 +43,10 @@ public class BaseRepositoryTest {
     protected List<Tag> testTags;
     protected List<BookTag> testBookTags;
 
+    protected static final int BOOK_COUNT = 10;
+    protected static final int TAG_COUNT = 4;
+    protected static final int CUSTOM_TAG_COUNT = 3;
+
     protected void setUpUserBookRepositoryData() {
         createOneUserData();
         createBookData();
@@ -76,7 +80,7 @@ public class BaseRepositoryTest {
     }
 
     private void createBookData() {
-        testBooks = BookFactory.createBooks(10);
+        testBooks = BookFactory.createBooks(BOOK_COUNT);
         bookRepository.saveAll(testBooks);
     }
 
