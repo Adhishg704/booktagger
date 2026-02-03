@@ -57,6 +57,11 @@ public class BaseRepositoryTest {
         createBookData();
     }
 
+    protected void setUpTagRepositoryData() {
+        createOneUserData();
+        createTagData();
+    }
+
     protected void setUpBookTagRepositoryData() {
         createOneUserData();
         createBookData();
@@ -82,6 +87,7 @@ public class BaseRepositoryTest {
 
     private void createTagData() {
         testTags = TagFactory.createTagList(testUser, TagType.CUSTOM, "Fantasy", "Sci-fi", "Speculative fiction");
+        TagFactory.addTag(testTags, TagFactory.createTag(testUser, TagType.MOOD, "Dark"));
         tagRepository.saveAll(testTags);
     }
 

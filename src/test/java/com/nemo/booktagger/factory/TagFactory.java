@@ -6,6 +6,7 @@ import com.nemo.booktagger.enums.TagType;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class TagFactory {
 
@@ -28,7 +29,14 @@ public final class TagFactory {
     ) {
         return Arrays.stream(tagNames)
                 .map(name -> createTag(user, tagType, name))
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    public static void addTag(
+            List<Tag> tagList,
+            Tag tag
+    ) {
+        tagList.add(tag);
     }
 
 }
