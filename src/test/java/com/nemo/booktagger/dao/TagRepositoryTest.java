@@ -9,6 +9,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,6 +49,23 @@ public class TagRepositoryTest extends BaseRepositoryTest {
         Tag tag = returnedTag.get();
         assertEquals(firstTag.getTagName(), tag.getTagName(), "Wrong tag name returned by repository");
         assertEquals(firstTag.getTagType(), tag.getTagType(), "Wrong tag type returned by repository");
+    }
+
+    @Test
+    public void testFindByUserIdAndTagType() {
+        Tag firstTag = testTags.getFirst();
+        List<Tag> returnedTags = tagRepository.findByUser_IdAndTagType(testUser.getId(), firstTag.getTagType());
+
+        assertFalse(returnedTags.isEmpty(), "List should not be empty");
+        assertEquals(CUSTOM_TAG_COUNT, returnedTags.size(), "Unexpected number of custom tags");
+        assertTrue(
+                returnedTags.stream().allMatch(tag -> tag.getTagType().equals(TagType.CUSTOM)),
+                "All tags should be custom tags"
+        );
+        assertTrue(
+                returnedTags.stream().allMatch(tag -> tag.getUser().getId().equals(testUser.getId())),
+                "All tags should be owned by user"
+        );
     }
 
     @Test
