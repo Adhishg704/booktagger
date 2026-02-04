@@ -9,5 +9,4 @@ import java.util.List;
 public interface BookTagRepository extends JpaRepository<BookTag, Integer> {
     List<BookTag> findByUser_IdAndBook_Id(Integer userId, Integer bookId);
     List<BookTag> findByUser_IdAndTag_TagName(Integer userId, String tagName);
-    List<BookTag> findByUser_IdAndTag_TagType(Integer userId, TagType tagType);
 }

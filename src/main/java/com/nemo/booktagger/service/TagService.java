@@ -12,10 +12,10 @@ public interface TagService {
     String getTagNameById(Integer tagId);
     TagType getTagTypeById(Integer tagId);
 
+    List<Tag> getCustomTagsCreatedByUser(Integer userId);
+    List<Tag> getMoodTagsForUser(Integer userId);
+    List<Tag> getPaceTagsForUser(Integer userId);
     List<BookTag> getBookTagsByTagName(Integer userId, String tagName);
-    List<BookTag> getCustomBookTags(Integer userId);
-    List<BookTag> getMoodBookTags(Integer userId);
-    List<BookTag> getPaceBookTags(Integer userId);
 
     Tag createTag(Integer userId, String tagName, TagType tagType);
     void renameCustomTag(Integer userId, Integer tagId, String newName);

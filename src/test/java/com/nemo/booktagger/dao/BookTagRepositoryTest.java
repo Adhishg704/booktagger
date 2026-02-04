@@ -59,20 +59,4 @@ public class BookTagRepositoryTest extends BaseRepositoryTest {
         assertEquals(tag.getTagName(), returnedTag.getTagName(), "Tag names should be same");
         assertEquals(book.getTitle(), returnedBook.getTitle(), "Book names should be same");
     }
-
-    @Test
-    public void testFindByUserIdAndTagType() {
-        BookTag bookTag = testBookTags.getFirst();
-        Tag tag = bookTag.getTag();
-        Book book = bookTag.getBook();
-
-        List<BookTag> bookTagList = bookTagRepository.findByUser_IdAndTag_TagType(testUser.getId(), tag.getTagType());
-        BookTag returnedBookTag = bookTagList.getFirst();
-        Tag returnedTag = returnedBookTag.getTag();
-        Book returnedBook = returnedBookTag.getBook();
-
-        assertEquals(BOOK_COUNT * CUSTOM_TAG_COUNT, bookTagList.size(), "There should be 3 custom tags for each book");
-        assertEquals(tag.getTagName(), returnedTag.getTagName(), "Tag names should be same");
-        assertEquals(book.getTitle(), returnedBook.getTitle(), "Book names should be same");
-    }
 }

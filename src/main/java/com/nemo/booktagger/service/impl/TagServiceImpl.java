@@ -47,23 +47,23 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public List<Tag> getCustomTagsCreatedByUser(Integer userId) {
+        return tagRepository.findByUser_IdAndTagType(userId, TagType.CUSTOM);
+    }
+
+    @Override
+    public List<Tag> getMoodTagsForUser(Integer userId) {
+        return tagRepository.findByUser_IdAndTagType(userId, TagType.MOOD);
+    }
+
+    @Override
+    public List<Tag> getPaceTagsForUser(Integer userId) {
+        return tagRepository.findByUser_IdAndTagType(userId, TagType.PACE);
+    }
+
+    @Override
     public List<BookTag> getBookTagsByTagName(Integer userId, String tagName) {
         return bookTagRepository.findByUser_IdAndTag_TagName(userId, tagName);
-    }
-
-    @Override
-    public List<BookTag> getCustomBookTags(Integer userId) {
-        return bookTagRepository.findByUser_IdAndTag_TagType(userId, TagType.CUSTOM);
-    }
-
-    @Override
-    public List<BookTag> getMoodBookTags(Integer userId) {
-        return bookTagRepository.findByUser_IdAndTag_TagType(userId, TagType.MOOD);
-    }
-
-    @Override
-    public List<BookTag> getPaceBookTags(Integer userId) {
-        return bookTagRepository.findByUser_IdAndTag_TagType(userId, TagType.PACE);
     }
 
     @Override
