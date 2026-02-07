@@ -115,7 +115,7 @@ public class TagServiceImpl implements TagService {
             throw new RuntimeException("Can only delete custom tags");
         }
 
-        tagRepository.deleteById(tagId);
+        tagRepository.delete(tag);
     }
 
     private EntityNotFoundException tagNotFound(Integer tagId) {
