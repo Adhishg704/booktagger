@@ -9,4 +9,5 @@ import java.util.List;
 public interface BookTagRepository extends JpaRepository<BookTag, Integer> {
     List<BookTag> findByUser_IdAndBook_Id(Integer userId, Integer bookId);
     List<BookTag> findByUser_IdAndTag_TagName(Integer userId, String tagName);
+    boolean existsByUser_IdAndBook_IdAndTag_Id(Integer userId, Integer bookId, Integer tagId);
 }

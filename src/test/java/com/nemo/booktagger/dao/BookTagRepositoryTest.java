@@ -59,4 +59,12 @@ public class BookTagRepositoryTest extends BaseRepositoryTest {
         assertEquals(tag.getTagName(), returnedTag.getTagName(), "Tag names should be same");
         assertEquals(book.getTitle(), returnedBook.getTitle(), "Book names should be same");
     }
+
+    @Test
+    public void testExistsByUserIdAndBookIdAndTagId() {
+        Book firstBook = testBooks.getFirst();
+        Tag firstTag = testTags.getFirst();
+        assertTrue(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(testUser.getId(), firstBook.getId(),
+                firstTag.getId()));
+    }
 }

@@ -3,10 +3,14 @@ package com.nemo.booktagger.service.impl;
 import com.nemo.booktagger.dao.BookRepository;
 import com.nemo.booktagger.dao.BookTagRepository;
 import com.nemo.booktagger.dao.UserBookRepository;
+import com.nemo.booktagger.dao.UserRepository;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
+import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.factory.BookFactory;
+import com.nemo.booktagger.factory.UserFactory;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,11 @@ public class BookServiceImplTest {
     private final Integer existingBookId = 1;
     private final Integer nonExistingBookId = 2;
     private final String bookNotFoundExceptionMessage = "Book id " + nonExistingBookId + " not found";
+    private User user;
     private Book book;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private BookRepository bookRepository;
@@ -42,12 +50,8 @@ public class BookServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        book = new Book();
-        book.setTitle("Book1");
-        book.setAuthor("Author1");
-        book.setDescription("Some description");
-        book.setYearPublished("2020");
-        book.setIsbn(100000L);
+        user = UserFactory.createUser("user1", "user1@gmail.com");
+        book = BookFactory.createBook("Book1", "Author1", "Desc1", 111111L, "2025");
     }
 
     @Test
@@ -339,5 +343,43 @@ public class BookServiceImplTest {
 
         verify(userBookRepository, times(1))
                 .findByUser_IdAndStatus(userId, ReadingStatus.TO_READ);
+    }
+
+    @Test
+    public void testAddUserBookThrowsExceptionForExistingUserBook() {
+        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
+        when(bookRepository.getReferenceById(book.getId())).thenReturn(book);
+        when(userBookRepository.existsByUser_IdAndBook_Id(user.getId(), book.getId())).thenReturn(true);
+
+        RuntimeException exc = assertThrows(
+                RuntimeException.class,
+                () -> bookService.addUserBook(user.getId(), book.getId(), 2025, ReadingStatus.READ, 5.0)
+        );
+
+        String expectedExceptionMessage = "Book already in user's library";
+        assertEquals(expectedExceptionMessage, exc.getMessage(), "Unexpected exception message");
+        verify(userRepository, times(1)).getReferenceById(eq(user.getId()));
+        verify(bookRepository, times(1)).getReferenceById(eq(book.getId()));
+        verify(userBookRepository, never()).save(any(UserBook.class));
+    }
+
+    @Test
+    public void testAddUserBookCreatesUserBookForNonExistingUserBook() {
+        UserBook userBook = new UserBook();
+        userBook.setUser(user);
+        userBook.setBook(book);
+        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
+        when(bookRepository.getReferenceById(book.getId())).thenReturn(book);
+        when(userBookRepository.existsByUser_IdAndBook_Id(user.getId(), book.getId())).thenReturn(false);
+        when(userBookRepository.save(any(UserBook.class))).thenReturn(userBook);
+
+        UserBook returnedUserBook = bookService.addUserBook(user.getId(), book.getId(), 2025, ReadingStatus.READ, 5.0);
+
+        assertNotNull(returnedUserBook, "User book should be returned");
+        assertEquals(userBook.getUser(), returnedUserBook.getUser(), "Unexpected user");
+        assertEquals(userBook.getBook(), returnedUserBook.getBook(), "Unexpected book");
+        verify(userRepository, times(1)).getReferenceById(eq(user.getId()));
+        verify(bookRepository, times(1)).getReferenceById(eq(book.getId()));
+        verify(userBookRepository, times(1)).save(any(UserBook.class));
     }
 }

@@ -16,7 +16,7 @@ public final class BookFactory {
         return new Book(title, author, description, isbn, year);
     }
 
-    public static Book createBook() {
+    private static Book createBook() {
         counter++;
         return createBook("Book " + counter, "Author " + counter, "Description " + counter,
                 1000000000L + counter, "2025");

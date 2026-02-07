@@ -3,8 +3,10 @@ package com.nemo.booktagger.service.impl;
 import com.nemo.booktagger.dao.BookRepository;
 import com.nemo.booktagger.dao.BookTagRepository;
 import com.nemo.booktagger.dao.UserBookRepository;
+import com.nemo.booktagger.dao.UserRepository;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
+import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.service.BookService;
@@ -17,12 +19,14 @@ import java.util.List;
 @Service
 public class BookServiceImpl implements BookService {
 
+    private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final UserBookRepository userBookRepository;
     private final BookTagRepository bookTagRepository;
 
-    public BookServiceImpl(BookRepository bookRepository, UserBookRepository userBookRepository,
+    public BookServiceImpl(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository,
                            BookTagRepository bookTagRepository) {
+        this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository = userBookRepository;
         this.bookTagRepository = bookTagRepository;
@@ -79,6 +83,26 @@ public class BookServiceImpl implements BookService {
         );
         bookRepository.save(book);
         return book;
+    }
+
+    @Override
+    @Transactional
+    public UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating) {
+        User user = userRepository.getReferenceById(userId);
+        Book book = bookRepository.getReferenceById(bookId);
+
+        if(userBookRepository.existsByUser_IdAndBook_Id(userId, bookId)) {
+            throw new RuntimeException("Book already in user's library");
+        }
+
+        UserBook userBook = new UserBook();
+        userBook.setUser(user);
+        userBook.setBook(book);
+        userBook.setYearRead(yearRead);
+        userBook.setStatus(status);
+        userBook.setRating(rating);
+
+        return userBookRepository.save(userBook);
     }
 
     @Override

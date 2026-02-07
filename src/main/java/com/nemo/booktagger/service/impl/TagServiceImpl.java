@@ -1,8 +1,10 @@
 package com.nemo.booktagger.service.impl;
 
+import com.nemo.booktagger.dao.BookRepository;
 import com.nemo.booktagger.dao.BookTagRepository;
 import com.nemo.booktagger.dao.TagRepository;
 import com.nemo.booktagger.dao.UserRepository;
+import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.entity.User;
@@ -20,11 +22,14 @@ public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final BookRepository bookRepository;
     private final BookTagRepository bookTagRepository;
 
-    public TagServiceImpl(TagRepository tagRepository, UserRepository userRepository, BookTagRepository bookTagRepository) {
+    public TagServiceImpl(TagRepository tagRepository, UserRepository userRepository, BookRepository bookRepository,
+                          BookTagRepository bookTagRepository) {
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
         this.bookTagRepository = bookTagRepository;
     }
 
@@ -81,6 +86,25 @@ public class TagServiceImpl implements TagService {
         tag.setUser(user);
 
         return tagRepository.save(tag);
+    }
+
+    @Override
+    @Transactional
+    public BookTag createBookTag(Integer userId, Integer bookId, Integer tagId) {
+        User user = userRepository.getReferenceById(userId);
+        Book book = bookRepository.getReferenceById(bookId);
+        Tag tag = tagRepository.getReferenceById(tagId);
+
+        if(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(userId, bookId, tagId)) {
+            throw new RuntimeException("Tag already applied to user book");
+        }
+
+        BookTag bookTag = new BookTag();
+        bookTag.setUser(user);
+        bookTag.setBook(book);
+        bookTag.setTag(tag);
+
+        return bookTagRepository.save(bookTag);
     }
 
     @Override

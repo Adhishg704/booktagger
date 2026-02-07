@@ -18,6 +18,7 @@ public interface TagService {
     List<BookTag> getBookTagsByTagName(Integer userId, String tagName);
 
     Tag createTag(Integer userId, String tagName, TagType tagType);
+    BookTag createBookTag(Integer userId, Integer bookId, Integer tagId);
     void renameCustomTag(Integer userId, Integer tagId, String newName);
     void deleteCustomTag(Integer userId, Integer tagId);
 }

@@ -152,4 +152,11 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
         Book userbook = userBooks.getFirst().getBook();
         assertEquals(firstBook.getAuthor(), userbook.getAuthor(), "Unexpected author");
     }
+
+    @Test
+    public void testExistsByUserIdAndBookId() {
+        Book firstBook = testBooks.getFirst();
+        assertTrue(userBookRepository.existsByUser_IdAndBook_Id(testUser.getId(), firstBook.getId()),
+                "User book should exist");
+    }
 }

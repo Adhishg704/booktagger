@@ -29,4 +29,6 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer> {
     List<UserBook> findByUser_IdAndYearRead(Integer userId, Integer year);
 
     List<UserBook> findByUser_IdAndStatus(Integer userId, ReadingStatus status);
+
+    boolean existsByUser_IdAndBook_Id(Integer userId, Integer bookId);
 }

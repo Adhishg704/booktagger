@@ -17,6 +17,7 @@ public interface BookService {
     String getYearPublishedById(Integer bookId);
 
     Book addBook(String title, String author, String description, long isbn, String yearPublished);
+    UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating);
 
     long getNumberOfUsersWhoOwnTheBook(Integer bookId);
     List<BookTag> getTagsAssociatedWithBookForUser(Integer userId, Integer bookId);

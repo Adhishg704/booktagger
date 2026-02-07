@@ -1,5 +1,6 @@
 package com.nemo.booktagger.service.impl;
 
+import com.nemo.booktagger.dao.BookRepository;
 import com.nemo.booktagger.dao.BookTagRepository;
 import com.nemo.booktagger.dao.TagRepository;
 import com.nemo.booktagger.dao.UserRepository;
@@ -35,6 +36,7 @@ public class TagServiceImplTest {
     private final String nonExistingTagName = "Sci-fi";
     private final String tagNotFoundExceptionMessage = "Tag with tag id " + nonExistingId + " not found";
     private User user;
+    private Book book;
     private Tag tag;
 
     @Mock
@@ -42,6 +44,9 @@ public class TagServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private BookRepository bookRepository;
 
     @Mock
     private BookTagRepository bookTagRepository;
@@ -52,11 +57,11 @@ public class TagServiceImplTest {
     @BeforeEach
     public void setUp() {
         user = UserFactory.createUser("user1", "user1@gmail.com");
+        book = BookFactory.createBook("Book1", "Author1", "Desc1", 111111L, "2025");
         tag = TagFactory.createTag(user, TagType.CUSTOM, tagName);
     }
 
     private List<BookTag> createBookTagList() {
-        Book book = BookFactory.createBook();
         BookTag bookTag = BookTagFactory.createBookTag(user, book, tag);
         List<BookTag> bookTags = new ArrayList<>();
         for(int i = 0; i < 2; i ++) {
@@ -421,5 +426,52 @@ public class TagServiceImplTest {
                 .findByIdAndUser_Id(tag.getId(), user.getId());
         verify(tagRepository, times(1))
                 .delete(eq(tag));
+    }
+
+    @Test
+    public void testCreateBookTagThrowsExceptionForExistingBookTag() {
+        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
+        when(bookRepository.getReferenceById(book.getId())).thenReturn(book);
+        when(tagRepository.getReferenceById(tag.getId())).thenReturn(tag);
+        when(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(user.getId(), book.getId(), tag.getId())).thenReturn(true);
+
+        RuntimeException exc = assertThrows(
+                RuntimeException.class,
+                () -> tagService.createBookTag(user.getId(), book.getId(), tag.getId())
+        );
+
+        String expectedExceptionMessage = "Tag already applied to user book";
+        assertEquals(expectedExceptionMessage, exc.getMessage(), "Unexpected exception message");
+        verify(userRepository, times(1)).getReferenceById(eq(user.getId()));
+        verify(bookRepository, times(1)).getReferenceById(eq(book.getId()));
+        verify(tagRepository, times(1)).getReferenceById(tag.getId());
+        verify(bookTagRepository, times(1)).existsByUser_IdAndBook_IdAndTag_Id(
+                user.getId(), book.getId(), tag.getId()
+        );
+        verify(bookTagRepository, never()).save(any(BookTag.class));
+    }
+
+    @Test
+    public void testCreateBookTagCreatesBookTagForNonExistingBookTag() {
+        BookTag bookTag = BookTagFactory.createBookTag(user, book, tag);
+        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
+        when(bookRepository.getReferenceById(book.getId())).thenReturn(book);
+        when(tagRepository.getReferenceById(tag.getId())).thenReturn(tag);
+        when(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(user.getId(), book.getId(), tag.getId())).thenReturn(false);
+        when(bookTagRepository.save(any(BookTag.class))).thenReturn(bookTag);
+
+        BookTag returnedBookTag = tagService.createBookTag(user.getId(), book.getId(), tag.getId());
+
+        assertNotNull(returnedBookTag, "Book tag must be returned");
+        assertEquals(bookTag.getUser(), returnedBookTag.getUser(), "User must be same for both");
+        assertEquals(bookTag.getBook(), returnedBookTag.getBook(), "Book must be same for both");
+        assertEquals(bookTag.getTag(), returnedBookTag.getTag(), "Tag must be same for both");
+        verify(userRepository, times(1)).getReferenceById(eq(user.getId()));
+        verify(bookRepository, times(1)).getReferenceById(eq(book.getId()));
+        verify(tagRepository, times(1)).getReferenceById(tag.getId());
+        verify(bookTagRepository, times(1)).existsByUser_IdAndBook_IdAndTag_Id(
+                user.getId(), book.getId(), tag.getId()
+        );
+        verify(bookTagRepository, times(1)).save(any(BookTag.class));
     }
 }
