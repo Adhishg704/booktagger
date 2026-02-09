@@ -34,12 +34,12 @@ public class Book {
     private String description;
 
     @Column(name = "isbn")
-    private long isbn;
+    private String isbn;
 
     @Column(name = "year_published")
     private String yearPublished;
 
-    public Book(String title, String author, String description, long isbn, String yearPublished) {
+    public Book(String title, String author, String description, String isbn, String yearPublished) {
         this.title = title;
         this.author = author;
         this.description = description;

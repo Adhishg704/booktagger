@@ -51,7 +51,7 @@ public class BookServiceImplTest {
     @BeforeEach
     public void setUp() {
         user = UserFactory.createUser("user1", "user1@gmail.com");
-        book = BookFactory.createBook("Book1", "Author1", "Desc1", 111111L, "2025");
+        book = BookFactory.createBook("Book1", "Author1", "Desc1", "111111", "2025");
     }
 
     @Test
@@ -185,7 +185,7 @@ public class BookServiceImplTest {
         when(bookRepository.findIsbnById(existingBookId))
                 .thenReturn(Optional.of(book.getIsbn()));
 
-        Long isbn = bookService.getIsbnById(existingBookId);
+        String isbn = bookService.getIsbnById(existingBookId);
 
         assertEquals(book.getIsbn(), isbn);
         verify(bookRepository, times(1)).findIsbnById(existingBookId);

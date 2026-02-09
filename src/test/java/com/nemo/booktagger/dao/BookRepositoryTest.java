@@ -49,7 +49,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testFindIsbnById() {
         Book firstBook = testBooks.getFirst();
-        Optional<Long> expectedBookIsbn = bookRepository.findIsbnById(firstBook.getId());
+        Optional<String> expectedBookIsbn = bookRepository.findIsbnById(firstBook.getId());
         assertTrue(expectedBookIsbn.isPresent());
         assertEquals(firstBook.getIsbn(), expectedBookIsbn.get(), "Wrong ISBN returned by repository");
     }
@@ -65,7 +65,7 @@ public class BookRepositoryTest extends BaseRepositoryTest {
     @Test
     public void testExistsByIsbn() {
         assertFalse(
-                bookRepository.existsByIsbn(1000000069L)
+                bookRepository.existsByIsbn("1000000069")
         );
     }
 }

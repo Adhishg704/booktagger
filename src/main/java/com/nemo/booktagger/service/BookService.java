@@ -13,10 +13,10 @@ public interface BookService {
     String getTitleById(Integer bookId);
     String getAuthorById(Integer bookId);
     String getDescriptionById(Integer bookId);
-    long getIsbnById(Integer bookId);
+    String getIsbnById(Integer bookId);
     String getYearPublishedById(Integer bookId);
 
-    Book addBook(String title, String author, String description, long isbn, String yearPublished);
+    Book addBook(String title, String author, String description, String isbn, String yearPublished);
     UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating);
 
     long getNumberOfUsersWhoOwnTheBook(Integer bookId);

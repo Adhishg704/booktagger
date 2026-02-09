@@ -57,7 +57,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public long getIsbnById(Integer bookId) {
+    public String getIsbnById(Integer bookId) {
         return bookRepository.findIsbnById(bookId)
                 .orElseThrow(() -> bookNotFound(bookId));
     }
@@ -70,7 +70,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book addBook(String title, String author, String description, long isbn, String yearPublished) {
+    public Book addBook(String title, String author, String description, String isbn, String yearPublished) {
         if(bookRepository.existsByIsbn(isbn)) {
             throw new RuntimeException("Book already exists");
         }
