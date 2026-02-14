@@ -19,7 +19,7 @@ public class StoryGraphBookCsvRow {
     private String author;
 
     @CsvBindByName(column = "ISBN/UID")
-    private long isbn;
+    private String isbn;
 
     @CsvBindByName(column = "Read Status")
     private String status;
