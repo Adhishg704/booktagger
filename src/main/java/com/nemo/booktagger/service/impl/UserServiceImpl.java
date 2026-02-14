@@ -107,12 +107,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public long countBooksInLibraryByYear(Integer userId, Integer year) {
+    public long countBooksInLibraryByYear(Integer userId, String year) {
         return userBookRepository.countByUser_IdAndYearRead(userId, year);
     }
 
     @Override
-    public long countBooksInLibraryByYearAndStatus(Integer userId, ReadingStatus status, Integer year) {
+    public long countBooksInLibraryByYearAndStatus(Integer userId, ReadingStatus status, String year) {
         return userBookRepository.countByUser_IdAndStatusAndYearRead(userId, status, year);
     }
 

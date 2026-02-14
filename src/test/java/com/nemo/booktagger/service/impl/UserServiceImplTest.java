@@ -288,7 +288,7 @@ public class UserServiceImplTest {
     @Test
     public void testCountBooksInLibraryByYearReturnsCorrectValue() {
         long expectedCount = 2L;
-        int year = 2025;
+        String year = "2025";
 
         when(userBookRepository.countByUser_IdAndYearRead(userId, year)).thenReturn(expectedCount);
 
@@ -302,7 +302,7 @@ public class UserServiceImplTest {
     public void testCountBooksInLibraryByYearAndStatusReturnsCorrectValue() {
         long expectedCount = 1L;
         ReadingStatus status = ReadingStatus.READ;
-        int year = 2025;
+        String year = "2025";
 
         when(userBookRepository.countByUser_IdAndStatusAndYearRead(userId, status, year))
                 .thenReturn(expectedCount);

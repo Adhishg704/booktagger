@@ -13,11 +13,11 @@ public final class UserBookFactory {
 
     }
 
-    public static UserBook createUserBook(User user, Book book, int yearRead, ReadingStatus status, double rating) {
+    public static UserBook createUserBook(User user, Book book, String yearRead, ReadingStatus status, double rating) {
         return new UserBook(user, book, yearRead, status, rating);
     }
 
-    public static List<UserBook> createUserBooks(User user, List<Book> books, int yearRead, ReadingStatus status, double rating) {
+    public static List<UserBook> createUserBooks(User user, List<Book> books, String yearRead, ReadingStatus status, double rating) {
         List<UserBook> userBooks = new ArrayList<>();
 
         for (Book book : books) {

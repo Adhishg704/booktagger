@@ -17,7 +17,7 @@ public interface BookService {
     String getYearPublishedById(Integer bookId);
 
     Book addBook(String title, String author, String isbn);
-    UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating);
+    UserBook addUserBook(Integer userId, Integer bookId, String yearRead, ReadingStatus status, Double rating);
 
     long getNumberOfUsersWhoOwnTheBook(Integer bookId);
     List<BookTag> getTagsAssociatedWithBookForUser(Integer userId, Integer bookId);
@@ -25,7 +25,7 @@ public interface BookService {
     List<UserBook> getUserBooksByAuthor(Integer userId, String author);
     List<UserBook> getUserBooksByTitle(Integer userId, String titlePart);
     List<UserBook> getUserBooksByYearPublished(Integer userId, String year);
-    List<UserBook> getUserBooksByYearRead(Integer userId, Integer year);
+    List<UserBook> getUserBooksByYearRead(Integer userId, String year);
     List<UserBook> getUserBooksByRatingRange(Integer userId, double minRating, double maxRating);
     List<UserBook> getBooksReadByUser(Integer userId);
     List<UserBook> getBooksUserDidNotFinish(Integer userId);

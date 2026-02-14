@@ -36,7 +36,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     public void testCountByUserIdAndYearRead() {
         assertEquals(
                 testUserBooks.size(),
-                userBookRepository.countByUser_IdAndYearRead(testUser.getId(), 2025),
+                userBookRepository.countByUser_IdAndYearRead(testUser.getId(), "2025"),
                 "Unexpected number of user books in 2025"
         );
     }
@@ -54,7 +54,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
     public void testCountByUserIdAndStatusAndYearRead() {
         assertEquals(
                 testUserBooks.size(),
-                userBookRepository.countByUser_IdAndStatusAndYearRead(testUser.getId(), ReadingStatus.READ, 2025),
+                userBookRepository.countByUser_IdAndStatusAndYearRead(testUser.getId(), ReadingStatus.READ, "2025"),
                 "Unexpected number of user books read in 2025"
         );
     }
@@ -95,7 +95,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void testFindByUserIdAndYearRead() {
-        Integer yearRead = testUserBooks.getFirst().getYearRead();
+        String yearRead = testUserBooks.getFirst().getYearRead();
         List<UserBook> userBooks = userBookRepository.findByUser_IdAndYearRead(testUser.getId(),
                 yearRead);
 

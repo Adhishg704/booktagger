@@ -40,7 +40,7 @@ public class UserBook {
     private Book book;
 
     @Column(name = "year_read")
-    private Integer yearRead;
+    private String yearRead;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -49,7 +49,7 @@ public class UserBook {
     @Column(name = "rating", precision = 3)
     private Double rating;
 
-    public UserBook(User user, Book book, Integer yearRead, ReadingStatus status, Double rating) {
+    public UserBook(User user, Book book, String yearRead, ReadingStatus status, Double rating) {
         this.user = user;
         this.book = book;
         this.yearRead = yearRead;

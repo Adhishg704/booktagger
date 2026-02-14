@@ -18,6 +18,6 @@ public interface UserService {
 
     long countBooksInLibrary(Integer userId);
     long countBooksInLibraryByStatus(Integer userId, ReadingStatus status);
-    long countBooksInLibraryByYear(Integer userId, Integer year);
-    long countBooksInLibraryByYearAndStatus(Integer userId, ReadingStatus status, Integer year);
+    long countBooksInLibraryByYear(Integer userId, String year);
+    long countBooksInLibraryByYearAndStatus(Integer userId, ReadingStatus status, String year);
 }

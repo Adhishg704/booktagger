@@ -109,7 +109,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating) {
+    public UserBook addUserBook(Integer userId, Integer bookId, String yearRead, ReadingStatus status, Double rating) {
         User user = userRepository.getReferenceById(userId);
         Book book = bookRepository.getReferenceById(bookId);
 
@@ -153,7 +153,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<UserBook> getUserBooksByYearRead(Integer userId, Integer year) {
+    public List<UserBook> getUserBooksByYearRead(Integer userId, String year) {
         return userBookRepository.findByUser_IdAndYearRead(userId, year);
     }
 

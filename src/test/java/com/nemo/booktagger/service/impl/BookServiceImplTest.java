@@ -265,7 +265,7 @@ public class BookServiceImplTest {
     @Test
     public void testGetUserBooksByYearReadReturnsCorrectList() {
         Integer userId = 10;
-        Integer yearRead = 2024;
+        String yearRead = "2024";
 
         List<UserBook> expectedUserBooks = List.of(
                 new UserBook(),
@@ -359,7 +359,7 @@ public class BookServiceImplTest {
 
         RuntimeException exc = assertThrows(
                 RuntimeException.class,
-                () -> bookService.addUserBook(user.getId(), book.getId(), 2025, ReadingStatus.READ, 5.0)
+                () -> bookService.addUserBook(user.getId(), book.getId(), "2025", ReadingStatus.READ, 5.0)
         );
 
         String expectedExceptionMessage = "Book already in user's library";
@@ -455,7 +455,7 @@ public class BookServiceImplTest {
         when(userBookRepository.existsByUser_IdAndBook_Id(user.getId(), book.getId())).thenReturn(false);
         when(userBookRepository.save(any(UserBook.class))).thenReturn(userBook);
 
-        UserBook returnedUserBook = bookService.addUserBook(user.getId(), book.getId(), 2025, ReadingStatus.READ, 5.0);
+        UserBook returnedUserBook = bookService.addUserBook(user.getId(), book.getId(), "2025", ReadingStatus.READ, 5.0);
 
         assertNotNull(returnedUserBook, "User book should be returned");
         assertEquals(userBook.getUser(), returnedUserBook.getUser(), "Unexpected user");

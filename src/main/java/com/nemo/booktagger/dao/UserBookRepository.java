@@ -11,11 +11,11 @@ import java.util.List;
 public interface UserBookRepository extends JpaRepository<UserBook, Integer> {
     long countByUser_Id(Integer userId);
 
-    long countByUser_IdAndYearRead(Integer userId, Integer year);
+    long countByUser_IdAndYearRead(Integer userId, String year);
 
     long countByUser_IdAndStatus(Integer userId, ReadingStatus status);
 
-    long countByUser_IdAndStatusAndYearRead(Integer userId, ReadingStatus status, Integer year);
+    long countByUser_IdAndStatusAndYearRead(Integer userId, ReadingStatus status, String year);
 
     long countByBook_Id(Integer bookId);
 
@@ -26,7 +26,7 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer> {
 
     List<UserBook> findByUser_IdAndBook_Author(Integer userId, String author);
 
-    List<UserBook> findByUser_IdAndYearRead(Integer userId, Integer year);
+    List<UserBook> findByUser_IdAndYearRead(Integer userId, String year);
 
     List<UserBook> findByUser_IdAndStatus(Integer userId, ReadingStatus status);
 

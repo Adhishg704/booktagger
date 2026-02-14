@@ -85,7 +85,7 @@ public class BaseRepositoryTest {
     }
 
     private void createUserBookData() {
-        testUserBooks = UserBookFactory.createUserBooks(testUser, testBooks, 2025, ReadingStatus.READ, 5.0);
+        testUserBooks = UserBookFactory.createUserBooks(testUser, testBooks, "2025", ReadingStatus.READ, 5.0);
         userBookRepository.saveAll(testUserBooks);
     }
 
