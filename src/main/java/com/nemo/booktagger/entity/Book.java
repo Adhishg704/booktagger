@@ -6,13 +6,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "books")
+@Table(name = "books",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"title", "author"}
+        ))
 @Setter
 @Getter
 @NoArgsConstructor
@@ -33,7 +37,7 @@ public class Book {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "isbn")
+    @Column(name = "isbn", unique = true)
     private String isbn;
 
     @Column(name = "year_published")

@@ -68,4 +68,12 @@ public class BookRepositoryTest extends BaseRepositoryTest {
                 bookRepository.existsByIsbn("1000000069")
         );
     }
+
+    @Test
+    public void testExistsByTitleAndAuthor() {
+        Book firstBook = testBooks.getFirst();
+        assertTrue(
+                bookRepository.existsByTitleAndAuthor(firstBook.getTitle(), firstBook.getAuthor())
+        );
+    }
 }

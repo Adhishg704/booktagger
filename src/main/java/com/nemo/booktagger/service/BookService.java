@@ -16,7 +16,7 @@ public interface BookService {
     String getIsbnById(Integer bookId);
     String getYearPublishedById(Integer bookId);
 
-    Book addBook(String title, String author, String description, String isbn, String yearPublished);
+    Book addBook(String title, String author, String isbn);
     UserBook addUserBook(Integer userId, Integer bookId, Integer yearRead, ReadingStatus status, Double rating);
 
     long getNumberOfUsersWhoOwnTheBook(Integer bookId);
