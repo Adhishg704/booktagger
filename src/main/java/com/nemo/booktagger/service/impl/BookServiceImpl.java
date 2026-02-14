@@ -1,5 +1,6 @@
 package com.nemo.booktagger.service.impl;
 
+import com.nemo.booktagger.client.BookMetadata;
 import com.nemo.booktagger.dao.BookRepository;
 import com.nemo.booktagger.dao.BookTagRepository;
 import com.nemo.booktagger.dao.UserBookRepository;
@@ -10,11 +11,13 @@ import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.service.BookService;
+import com.nemo.booktagger.service.GoogleBooksService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -24,12 +27,15 @@ public class BookServiceImpl implements BookService {
     private final UserBookRepository userBookRepository;
     private final BookTagRepository bookTagRepository;
 
+    private final GoogleBooksService googleBooksService;
+
     public BookServiceImpl(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository,
-                           BookTagRepository bookTagRepository) {
+                           BookTagRepository bookTagRepository, GoogleBooksService googleBooksService) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository = userBookRepository;
         this.bookTagRepository = bookTagRepository;
+        this.googleBooksService = googleBooksService;
     }
 
     @Override
@@ -70,10 +76,26 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book addBook(String title, String author, String description, String isbn, String yearPublished) {
-        if(bookRepository.existsByIsbn(isbn)) {
+    public Book addBook(String title, String author, String isbn) {
+        if((isbn != null && !isbn.isBlank() && bookRepository.existsByIsbn(isbn)) ||
+            bookRepository.existsByTitleAndAuthor(title, author)) {
             throw new RuntimeException("Book already exists");
         }
+        Optional<BookMetadata> bookMetadata = googleBooksService.
+                getBookMetadataFromGoogleBooks(isbn, title, author);
+
+        String description = "";
+        String yearPublished = "";
+
+        if(bookMetadata.isPresent()) {
+            description = bookMetadata.get().getDescription();
+            String date = bookMetadata.get().getPublishedDate();
+
+            if(date != null && date.length() >= 4) {
+                yearPublished = date.substring(0, 4);
+            }
+        }
+
         Book book = new Book(
                 title,
                 author,
