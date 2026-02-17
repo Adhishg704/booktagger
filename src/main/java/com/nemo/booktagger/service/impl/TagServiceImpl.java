@@ -14,8 +14,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -33,44 +31,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Tag getTagById(Integer tagId) {
-        return tagRepository.findById(tagId)
-                .orElseThrow(() -> tagNotFound(tagId));
-    }
-
-    @Override
-    public String getTagNameById(Integer tagId) {
-        return tagRepository.findTagNameById(tagId)
-                .orElseThrow(() -> tagNotFound(tagId));
-    }
-
-    @Override
-    public TagType getTagTypeById(Integer tagId) {
-        return tagRepository.findTagTypeById(tagId)
-                .orElseThrow(() -> tagNotFound(tagId));
-    }
-
-    @Override
-    public List<Tag> getCustomTagsCreatedByUser(Integer userId) {
-        return tagRepository.findByUser_IdAndTagType(userId, TagType.CUSTOM);
-    }
-
-    @Override
-    public List<Tag> getMoodTagsForUser(Integer userId) {
-        return tagRepository.findByUser_IdAndTagType(userId, TagType.MOOD);
-    }
-
-    @Override
-    public List<Tag> getPaceTagsForUser(Integer userId) {
-        return tagRepository.findByUser_IdAndTagType(userId, TagType.PACE);
-    }
-
-    @Override
-    public List<BookTag> getBookTagsByTagName(Integer userId, String tagName) {
-        return bookTagRepository.findByUser_IdAndTag_TagName(userId, tagName);
-    }
-
-    @Override
     @Transactional
     public Tag createTag(Integer userId, String tagName, TagType tagType) {
         if(tagRepository.existsByUser_IdAndTagNameAndTagType(userId, tagName, tagType)) {
@@ -85,6 +45,19 @@ public class TagServiceImpl implements TagService {
         tag.setUser(user);
 
         return tagRepository.save(tag);
+    }
+
+    @Transactional
+    @Override
+    public Tag getOrCreateTag(Integer userId, String tagName, TagType tagType) {
+        return tagRepository.findByUser_IdAndTagNameAndTagType(userId, tagName, tagType).
+                orElseGet(() -> {
+                    Tag tag = new Tag();
+                    tag.setTagName(tagName);
+                    tag.setTagType(tagType);
+                    tag.setUser(userRepository.getReferenceById(userId));
+                    return tagRepository.save(tag);
+                });
     }
 
     @Override

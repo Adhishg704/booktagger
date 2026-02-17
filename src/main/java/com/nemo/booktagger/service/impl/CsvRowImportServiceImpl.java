@@ -40,7 +40,7 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
         String author = row.getAuthor();
         String isbn = row.getIsbn();
 
-        return bookService.addBook(title, author, isbn);
+        return bookService.getOrCreateBook(title, author, isbn);
     }
 
     private void saveUserBook(Integer userId, Integer bookId, StoryGraphBookCsvRow row) {
@@ -63,7 +63,7 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
                 toArray(String[]::new);
 
         for(String mood: moodArray) {
-            Tag moodTag = tagService.createTag(userId, mood, TagType.MOOD);
+            Tag moodTag = tagService.getOrCreateTag(userId, mood, TagType.MOOD);
             tagService.createBookTag(userId, bookId, moodTag.getId());
         }
     }
@@ -74,7 +74,7 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
             return;
         }
 
-        Tag tag = tagService.createTag(userId, pace, TagType.PACE);
+        Tag tag = tagService.getOrCreateTag(userId, pace, TagType.PACE);
         tagService.createBookTag(userId, bookId, tag.getId());
     }
 
@@ -90,6 +90,9 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
                 break;
             case "did-not-finish":
                 readingStatus = ReadingStatus.DNF;
+                break;
+            case "currently-reading":
+                readingStatus = ReadingStatus.CURRENTLY_READING;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown reading status: " + row.getStatus());

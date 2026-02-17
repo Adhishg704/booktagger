@@ -23,6 +23,10 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("select b.yearPublished from Book b where b.id=:bookId")
     Optional<String> findYearPublishedById(@Param("bookId") Integer bookId);
 
+    Optional<Book> findByIsbn(String isbn);
+
+    Optional<Book> findByTitleAndAuthor(String title, String author);
+
     boolean existsByIsbn(String isbn);
 
     boolean existsByTitleAndAuthor(String title, String author);
