@@ -51,7 +51,7 @@ public class BookServiceImplTest {
     @BeforeEach
     public void setUp() {
         user = UserFactory.createUser("user1", "user1@gmail.com");
-        book = BookFactory.createBook("Book1", "Author1", "Desc1", "111111", "2025");
+        book = BookFactory.createBook("Book1", "Author1", "Desc1", "111111", "2025", "thumbnail");
     }
 
     @Test
@@ -97,7 +97,7 @@ public class BookServiceImplTest {
         book.setTitle("Title");
         book.setAuthor("Author");
         book.setIsbn("1234567891");
-        BookMetadata bookMetadata = new BookMetadata("Description", "2025");
+        BookMetadata bookMetadata = new BookMetadata("Description", "2025", "Thumbnail");
         when(googleBooksService.getBookMetadataFromGoogleBooks(eq(book.getIsbn()), eq(book.getTitle()),
                 eq(book.getAuthor()))).thenReturn(Optional.of(bookMetadata));
         when(bookRepository.existsByIsbn(eq(book.getIsbn()))).thenReturn(false);
@@ -112,6 +112,7 @@ public class BookServiceImplTest {
         assertEquals(book.getIsbn(), addedBook.getIsbn(), "Unexpected book isbn");
         assertEquals(bookMetadata.getDescription(), addedBook.getDescription(), "Unexpected book description");
         assertEquals(bookMetadata.getPublishedDate(), addedBook.getYearPublished(), "Unexpected published date");
+        assertEquals(bookMetadata.getThumbnailURL(), addedBook.getThumbnailURL(), "Unexpected thumbnail URL");
         verify(bookRepository, times(1)).existsByIsbn(eq(book.getIsbn()));
         verify(bookRepository, times(1)).existsByTitleAndAuthor(eq(book.getTitle()),
                 eq(book.getAuthor()));
@@ -138,8 +139,9 @@ public class BookServiceImplTest {
         assertEquals(book.getTitle(), addedBook.getTitle(), "Unexpected book title");
         assertEquals(book.getAuthor(), addedBook.getAuthor(), "Unexpected book author");
         assertEquals(book.getIsbn(), addedBook.getIsbn(), "Unexpected book isbn");
-        assertEquals("", addedBook.getDescription(), "Book description not available");
-        assertEquals("", addedBook.getYearPublished(), "Book published date not available");
+        assertNull(addedBook.getDescription(), "Book description not available");
+        assertNull(addedBook.getYearPublished(), "Book published date not available");
+        assertNull(addedBook.getThumbnailURL(), "Book image URL not available");
         verify(bookRepository, times(1)).existsByIsbn(eq(book.getIsbn()));
         verify(bookRepository, times(1)).existsByTitleAndAuthor(eq(book.getTitle()),
                 eq(book.getAuthor()));

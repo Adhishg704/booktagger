@@ -111,6 +111,11 @@ public class GoogleBooksServiceImplTest {
         volumeInfo.setDescription(description);
         volumeInfo.setPublishedDate(yearPublished);
 
+        GoogleBooksResponse.ImageLinks imageLinks = new GoogleBooksResponse.ImageLinks();
+        imageLinks.setThumbnail("thumbnail");
+
+        volumeInfo.setImageLinks(imageLinks);
+
         GoogleBooksResponse.Item item = new GoogleBooksResponse.Item();
         item.setVolumeInfo(volumeInfo);
 

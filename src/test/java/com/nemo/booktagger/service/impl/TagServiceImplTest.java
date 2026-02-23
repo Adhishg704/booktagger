@@ -52,7 +52,7 @@ public class TagServiceImplTest {
     @BeforeEach
     public void setUp() {
         user = UserFactory.createUser("user1", "user1@gmail.com");
-        book = BookFactory.createBook("Book1", "Author1", "Desc1", "111111", "2025");
+        book = BookFactory.createBook("Book1", "Author1", "Desc1", "111111", "2025", "thumbnail");
         tag = TagFactory.createTag(user, TagType.CUSTOM, tagName);
     }
 

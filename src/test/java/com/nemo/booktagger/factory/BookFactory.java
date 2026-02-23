@@ -12,14 +12,14 @@ public final class BookFactory {
 
     private static int counter = 0;
 
-    public static Book createBook(String title, String author, String description, String isbn, String year) {
-        return new Book(title, author, description, isbn, year);
+    public static Book createBook(String title, String author, String description, String isbn, String year, String thumbnailURL) {
+        return new Book(title, author, description, isbn, year, thumbnailURL);
     }
 
     private static Book createBook() {
         counter++;
         return createBook("Book " + counter, "Author " + counter, "Description " + counter,
-                "1000000000" + counter, "2025");
+                "1000000000" + counter, "2025", "thumbnail" + counter);
     }
 
     public static List<Book> createBooks(int count) {
