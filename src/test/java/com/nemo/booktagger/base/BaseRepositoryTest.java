@@ -1,10 +1,10 @@
 package com.nemo.booktagger.base;
 
-import com.nemo.booktagger.dao.BookRepository;
-import com.nemo.booktagger.dao.BookTagRepository;
-import com.nemo.booktagger.dao.TagRepository;
-import com.nemo.booktagger.dao.UserBookRepository;
-import com.nemo.booktagger.dao.UserRepository;
+import com.nemo.booktagger.dao.repository.BookRepository;
+import com.nemo.booktagger.dao.repository.BookTagRepository;
+import com.nemo.booktagger.dao.repository.TagRepository;
+import com.nemo.booktagger.dao.repository.UserBookRepository;
+import com.nemo.booktagger.dao.repository.UserRepository;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;

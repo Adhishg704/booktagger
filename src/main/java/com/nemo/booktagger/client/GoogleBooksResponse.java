@@ -18,5 +18,11 @@ public class GoogleBooksResponse {
     public static class VolumeInfo {
         private String description;
         private String publishedDate;
+        private ImageLinks imageLinks;
+    }
+
+    @Data
+    public static class ImageLinks {
+        private String thumbnail;
     }
 }

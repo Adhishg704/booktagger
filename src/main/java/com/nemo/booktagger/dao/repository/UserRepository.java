@@ -1,4 +1,4 @@
-package com.nemo.booktagger.dao;
+package com.nemo.booktagger.dao.repository;
 
 import com.nemo.booktagger.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

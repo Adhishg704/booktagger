@@ -1,19 +1,17 @@
 package com.nemo.booktagger.service.impl;
 
 import com.nemo.booktagger.client.BookMetadata;
-import com.nemo.booktagger.dao.BookRepository;
-import com.nemo.booktagger.dao.BookTagRepository;
-import com.nemo.booktagger.dao.UserBookRepository;
-import com.nemo.booktagger.dao.UserRepository;
+import com.nemo.booktagger.dao.repository.BookRepository;
+import com.nemo.booktagger.dao.repository.BookTagRepository;
+import com.nemo.booktagger.dao.repository.UserBookRepository;
+import com.nemo.booktagger.dao.repository.UserRepository;
 import com.nemo.booktagger.entity.Book;
-import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.factory.BookFactory;
 import com.nemo.booktagger.factory.UserFactory;
 import com.nemo.booktagger.service.GoogleBooksService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

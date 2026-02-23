@@ -43,11 +43,15 @@ public class Book {
     @Column(name = "year_published")
     private String yearPublished;
 
-    public Book(String title, String author, String description, String isbn, String yearPublished) {
+    @Column(name = "thumbnail")
+    private String thumbnailURL;
+
+    public Book(String title, String author, String description, String isbn, String yearPublished, String thumbnailURL) {
         this.title = title;
         this.author = author;
         this.description = description;
         this.isbn = isbn;
         this.yearPublished = yearPublished;
+        this.thumbnailURL = thumbnailURL;
     }
 }

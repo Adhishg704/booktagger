@@ -46,7 +46,8 @@ public class GoogleBooksServiceImpl implements GoogleBooksService {
                 bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo() != null) {
             BookMetadata bookMetadata = new BookMetadata(
                     bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getDescription(),
-                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getPublishedDate()
+                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getPublishedDate(),
+                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getImageLinks().getThumbnail()
             );
             return Optional.of(bookMetadata);
         }
@@ -60,7 +61,8 @@ public class GoogleBooksServiceImpl implements GoogleBooksService {
                 bookByIsbn.getItems().getFirst().getVolumeInfo() != null) {
             BookMetadata bookMetadata = new BookMetadata(
                     bookByIsbn.getItems().getFirst().getVolumeInfo().getDescription(),
-                    bookByIsbn.getItems().getFirst().getVolumeInfo().getPublishedDate()
+                    bookByIsbn.getItems().getFirst().getVolumeInfo().getPublishedDate(),
+                    bookByIsbn.getItems().getFirst().getVolumeInfo().getImageLinks().getThumbnail()
             );
             return Optional.of(bookMetadata);
         }

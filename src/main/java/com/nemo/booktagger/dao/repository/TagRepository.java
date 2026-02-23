@@ -1,6 +1,5 @@
-package com.nemo.booktagger.dao;
+package com.nemo.booktagger.dao.repository;
 
-import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.enums.TagType;
 import org.springframework.data.jpa.repository.JpaRepository;

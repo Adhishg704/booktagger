@@ -1,7 +1,7 @@
 package com.nemo.booktagger.service.impl;
 
-import com.nemo.booktagger.dao.UserBookRepository;
-import com.nemo.booktagger.dao.UserRepository;
+import com.nemo.booktagger.dao.repository.UserBookRepository;
+import com.nemo.booktagger.dao.repository.UserRepository;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.ReadingStatus;
 import jakarta.persistence.EntityNotFoundException;

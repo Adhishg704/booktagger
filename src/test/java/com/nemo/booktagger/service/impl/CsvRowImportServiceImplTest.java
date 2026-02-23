@@ -8,7 +8,6 @@ import com.nemo.booktagger.enums.TagType;
 import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.nemo.booktagger.service.TagService;
-import com.nemo.booktagger.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

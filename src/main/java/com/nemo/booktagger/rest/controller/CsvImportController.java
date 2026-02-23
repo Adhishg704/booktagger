@@ -1,4 +1,4 @@
-package com.nemo.booktagger.rest;
+package com.nemo.booktagger.rest.controller;
 
 import com.nemo.booktagger.service.impl.CsvImportServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;

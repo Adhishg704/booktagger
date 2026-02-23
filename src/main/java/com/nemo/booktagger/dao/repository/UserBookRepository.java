@@ -1,14 +1,15 @@
-package com.nemo.booktagger.dao;
+package com.nemo.booktagger.dao.repository;
 
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface UserBookRepository extends JpaRepository<UserBook, Integer> {
+public interface UserBookRepository extends JpaRepository<UserBook, Integer>, JpaSpecificationExecutor<UserBook> {
     long countByUser_Id(Integer userId);
 
     long countByUser_IdAndYearRead(Integer userId, String year);
