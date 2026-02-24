@@ -2,7 +2,9 @@ package com.nemo.booktagger.rest.dto.response;
 
 import com.nemo.booktagger.enums.ReadingStatus;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class UserBookResponse {
 
