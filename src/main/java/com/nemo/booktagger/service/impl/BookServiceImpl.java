@@ -115,39 +115,12 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<UserBookResponse> searchUserBooks(Integer userId, UserBookFilterRequest filter) {
-        Specification<UserBook> spec =
-                Specification.where(UserBookSpecifications.hasUser(userId));
-
-        if(filter.getYearRead() != null) {
-            spec = spec.and(UserBookSpecifications.hasYearRead(filter.getYearRead()));
-        }
-
-        if(filter.getYearPublished() != null) {
-            spec = spec.and(UserBookSpecifications.hasYearPublished((filter.getYearPublished())));
-        }
-
-        if(filter.getStatus() != null) {
-            spec = spec.and(UserBookSpecifications.hasStatus(filter.getStatus()));
-        }
-
-        List<UserBook> userBooks = userBookRepository.findAll(spec);
-
-        return userBooks.stream()
-                .map(this::mapToResponse)
-                .toList();
+    public List<String> getDistinctYearPublished(Integer userId) {
+        return userBookRepository.findDistinctYearPublished(userId);
     }
 
-    private UserBookResponse mapToResponse(UserBook userBook) {
-        Book book = userBook.getBook();
-
-        return new UserBookResponse(
-                book.getTitle(),
-                book.getAuthor(),
-                book.getYearPublished(),
-                userBook.getYearRead(),
-                userBook.getStatus(),
-                userBook.getRating()
-        );
+    @Override
+    public List<String> getDistinctYearRead(Integer userId) {
+        return userBookRepository.findDistinctYearRead(userId);
     }
 }

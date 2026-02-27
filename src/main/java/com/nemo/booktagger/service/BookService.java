@@ -16,5 +16,7 @@ public interface BookService {
 
     UserBook addUserBook(Integer userId, Integer bookId, String yearRead, ReadingStatus status, Double rating);
 
-    List<UserBookResponse> searchUserBooks(Integer userId, UserBookFilterRequest request);
+    List<String> getDistinctYearPublished(Integer userId);
+
+    List<String> getDistinctYearRead(Integer userId);
 }

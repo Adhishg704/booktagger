@@ -2,6 +2,7 @@ package com.nemo.booktagger.dao;
 
 import com.nemo.booktagger.base.BaseRepositoryTest;
 import com.nemo.booktagger.entity.Book;
+import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserBookRepositoryTest extends BaseRepositoryTest {
     @BeforeEach
     public void setUp() {
-        setUpUserBookRepositoryData();
+        setUpBookTagRepositoryData();
     }
 
     @Test
@@ -158,5 +159,44 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
         Book firstBook = testBooks.getFirst();
         assertTrue(userBookRepository.existsByUser_IdAndBook_Id(testUser.getId(), firstBook.getId()),
                 "User book should exist");
+    }
+
+    @Test
+    public void testFindDistinctYearRead() {
+        List<String> distinctYearRead = userBookRepository.findDistinctYearRead(testUser.getId());
+
+        assertEquals(1, distinctYearRead.size(), "All test books read in 2025");
+        String year = distinctYearRead.getFirst();
+        assertEquals("2025", year, "Unexpected year read");
+    }
+
+    @Test
+    public void testFindDistinctYearPublished() {
+        List<String> distinctYearPublished = userBookRepository.findDistinctYearPublished(testUser.getId());
+
+        assertEquals(1, distinctYearPublished.size(), "All test books published in 2025");
+        String year = distinctYearPublished.getFirst();
+        assertEquals("2025", year, "Unexpected year published");
+    }
+
+    @Test
+    public void testGetAllUserLibraryData() {
+        List<Object[]> allUserLibraryData = userBookRepository.getAllUserLibraryData(testUser.getId());
+
+        assertEquals(BOOK_COUNT * TAG_COUNT, allUserLibraryData.size(),
+                "Expected a row for each tag applied to each book");
+
+        for(Object[] data: allUserLibraryData) {
+            assertEquals(2, data.length);
+            UserBook userBook = (UserBook) data[0];
+            BookTag bookTag = (BookTag) data[1];
+
+            assertNotNull(userBook.getBook());
+            assertNotNull(bookTag.getBook());
+            assertNotNull(bookTag.getTag());
+            assertEquals(userBook.getBook(), bookTag.getBook(), "Both must point to same book");
+            assertTrue(testBooks.contains(userBook.getBook()), "Book must be present in test books");
+            assertTrue(testTags.contains(bookTag.getTag()), "Tag must be present in test tags");
+        }
     }
 }

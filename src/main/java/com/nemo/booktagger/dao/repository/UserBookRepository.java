@@ -4,6 +4,8 @@ import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -32,4 +34,29 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer>, Jp
     List<UserBook> findByUser_IdAndStatus(Integer userId, ReadingStatus status);
 
     boolean existsByUser_IdAndBook_Id(Integer userId, Integer bookId);
+
+    @Query(
+            "select distinct ub.yearRead from UserBook ub where ub.user.id=:userId order by ub.yearRead desc"
+    )
+    List<String> findDistinctYearRead(@Param("userId") Integer userId);
+
+    @Query("""
+            select distinct ub.book.yearPublished
+            from UserBook ub
+            where ub.user.id = :userId
+              and ub.book.yearPublished is not null
+            order by ub.book.yearPublished desc
+            """)
+    List<String> findDistinctYearPublished(@Param("userId") Integer userId);
+
+    @Query("""
+            select ub, bt
+            from UserBook ub
+            join fetch ub.book b
+            left join BookTag bt on bt.user.id=ub.user.id
+            and bt.book.id=b.id
+            left join fetch tag t
+            where ub.user.id=:userId
+            """)
+    List<Object[]> getAllUserLibraryData(@Param("userId") Integer userId);
 }

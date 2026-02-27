@@ -10,10 +10,7 @@ import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.factory.BookFactory;
-import com.nemo.booktagger.factory.UserBookFactory;
 import com.nemo.booktagger.factory.UserFactory;
-import com.nemo.booktagger.rest.dto.request.UserBookFilterRequest;
-import com.nemo.booktagger.rest.dto.response.UserBookResponse;
 import com.nemo.booktagger.service.GoogleBooksService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
@@ -176,95 +172,22 @@ public class BookServiceImplTest {
     }
 
     @Test
-    public void testSearchUserBooksByYearReadReturnsCorrectResponseForExistingYearRead() {
-        String yearRead = "2025";
-        UserBook userBook = UserBookFactory.createUserBook(
-                user, book, yearRead, ReadingStatus.READ, 5.0);
-        List<UserBook> userBookList = List.of(userBook);
-        UserBookFilterRequest request =
-                new UserBookFilterRequest(yearRead, null, null);
-        when(userBookRepository.findAll(any(Specification.class))).thenReturn(userBookList);
+    public void testGetDistinctYearReadReturnsListOfYears() {
+        List<String> yearsRead = List.of("2025", "2024", "2023", "2022");
+        when(userBookRepository.findDistinctYearRead(user.getId())).thenReturn(yearsRead);
 
-        List<UserBookResponse> response =
-                bookService.searchUserBooks(user.getId(), request);
+        List<String> distinctYearRead = bookService.getDistinctYearRead(user.getId());
 
-        verify(userBookRepository).findAll(any(Specification.class));
-        assertNotNull(response);
-        assertEquals(userBookList.size(), response.size());
-        assertEquals(yearRead, response.getFirst().getYearRead());
+        assertEquals(yearsRead.size(), distinctYearRead.size(), "Unexpected number of yearsRead");
     }
 
     @Test
-    public void testSearchUserBooksByYearReadReturnsCorrectResponseForNonExistingYearRead() {
-        String yearRead = "2024";
+    public void testGetDistinctYearPublishedReturnsListOfYears() {
+        List<String> yearsPublished = List.of("2025", "2024", "2023", "2022");
+        when(userBookRepository.findDistinctYearPublished(user.getId())).thenReturn(yearsPublished);
 
-        UserBookFilterRequest request =
-                new UserBookFilterRequest(yearRead, null, null);
+        List<String> distinctYearPublished = bookService.getDistinctYearPublished(user.getId());
 
-        when(userBookRepository.findAll(any(Specification.class))).thenReturn(List.of());
-
-        List<UserBookResponse> response =
-                bookService.searchUserBooks(user.getId(), request);
-
-        verify(userBookRepository).findAll(any(Specification.class));
-        assertNotNull(response);
-        assertTrue(response.isEmpty());
-    }
-
-    @Test
-    public void testSearchUserBooksByYearPublishedReturnsCorrectResponseForExistingYearPublished() {
-        String yearPublished = "2025";
-        book.setYearPublished(yearPublished);
-        UserBook userBook = UserBookFactory.createUserBook(
-                user, book, "2025", ReadingStatus.READ, 5.0);
-        List<UserBook> userBookList = List.of(userBook);
-        UserBookFilterRequest request =
-                new UserBookFilterRequest(null, yearPublished, null);
-        when(userBookRepository.findAll(any(Specification.class)))
-                .thenReturn(userBookList);
-
-        List<UserBookResponse> response =
-                bookService.searchUserBooks(user.getId(), request);
-
-        verify(userBookRepository).findAll(any(Specification.class));
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        assertEquals(yearPublished, response.getFirst().getYearPublished());
-    }
-
-    @Test
-    public void testSearchUserBooksByYearPublishedReturnsEmptyForNonExistingYearPublished() {
-        String yearPublished = "1999";
-        UserBookFilterRequest request =
-                new UserBookFilterRequest(null, yearPublished, null);
-        when(userBookRepository.findAll(any(Specification.class)))
-                .thenReturn(List.of());
-
-        List<UserBookResponse> response =
-                bookService.searchUserBooks(user.getId(), request);
-
-        verify(userBookRepository).findAll(any(Specification.class));
-        assertNotNull(response);
-        assertTrue(response.isEmpty());
-    }
-
-    @Test
-    public void testSearchUserBooksByStatusReturnsCorrectResponseForExistingStatus() {
-        ReadingStatus status = ReadingStatus.READ;
-        UserBook userBook = UserBookFactory.createUserBook(
-                user, book, "2025", status, 5.0);
-        List<UserBook> userBookList = List.of(userBook);
-        UserBookFilterRequest request =
-                new UserBookFilterRequest(null, null, status);
-        when(userBookRepository.findAll(any(Specification.class)))
-                .thenReturn(userBookList);
-
-        List<UserBookResponse> response =
-                bookService.searchUserBooks(user.getId(), request);
-
-        verify(userBookRepository).findAll(any(Specification.class));
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        assertEquals(status, response.getFirst().getStatus());
+        assertEquals(yearsPublished.size(), distinctYearPublished.size(), "Unexpected number of yearsRead");
     }
 }

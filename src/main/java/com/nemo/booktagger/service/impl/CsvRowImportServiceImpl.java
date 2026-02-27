@@ -79,26 +79,14 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
     }
 
     private ReadingStatus parseReadingStatus(StoryGraphBookCsvRow row) {
-        ReadingStatus readingStatus;
 
-        switch(row.getStatus()) {
-            case "read":
-                readingStatus = ReadingStatus.READ;
-                break;
-            case "to-read":
-                readingStatus = ReadingStatus.TO_READ;
-                break;
-            case "did-not-finish":
-                readingStatus = ReadingStatus.DNF;
-                break;
-            case "currently-reading":
-                readingStatus = ReadingStatus.CURRENTLY_READING;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown reading status: " + row.getStatus());
-        }
-
-        return readingStatus;
+        return switch (row.getStatus()) {
+            case "read" -> ReadingStatus.READ;
+            case "to-read" -> ReadingStatus.TO_READ;
+            case "did-not-finish" -> ReadingStatus.DNF;
+            case "currently-reading" -> ReadingStatus.CURRENTLY_READING;
+            default -> throw new IllegalArgumentException("Unknown reading status: " + row.getStatus());
+        };
     }
 
     private String parseYearRead(StoryGraphBookCsvRow row) {

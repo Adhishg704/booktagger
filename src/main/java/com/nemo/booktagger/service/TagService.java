@@ -3,10 +3,8 @@ package com.nemo.booktagger.service;
 import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.enums.TagType;
-import jakarta.transaction.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TagService {
 
@@ -17,4 +15,6 @@ public interface TagService {
     BookTag createBookTag(Integer userId, Integer bookId, Integer tagId);
     void renameCustomTag(Integer userId, Integer tagId, String newName);
     void deleteCustomTag(Integer userId, Integer tagId);
+
+    List<String> getDistinctTagTypes(Integer userId);
 }

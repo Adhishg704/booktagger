@@ -23,4 +23,10 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
     Optional<Tag> findByUser_IdAndTagNameAndTagType(Integer userId, String tagName, TagType tagType);
 
     boolean existsByUser_IdAndTagNameAndTagType(Integer userId, String tagName, TagType tagType);
+
+    @Query("""
+            select distinct t.tagType from Tag t
+            where t.user.id=:userId
+            """)
+    List<TagType> findDistinctTagTypes(@Param("userId") Integer userId);
 }
