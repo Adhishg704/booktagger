@@ -23,49 +23,39 @@ public class GoogleBooksServiceImpl implements GoogleBooksService {
     @Override
     public Optional<BookMetadata> getBookMetadataFromGoogleBooks(String isbn, String title, String author) {
         try {
-            if(isbn == null || isbn.isBlank()) {
-                return getBookMetadataFromTitleAndAuthor(title, author);
+            if (isbn != null && !isbn.isBlank()) {
+                Optional<BookMetadata> byIsbn = mapToMetadata(googleBooksClient.searchByIsbn(isbn));
+                if (byIsbn.isPresent()) return byIsbn;
             }
 
-            Optional<BookMetadata> bookMetadata = getBookMetadataFromIsbn(isbn);
-            if(bookMetadata.isEmpty())  {
-                return getBookMetadataFromTitleAndAuthor(title, author);
-            }
-
-            return bookMetadata;
-        }
-        catch(WebClientResponseException e) {
+            return mapToMetadata(googleBooksClient.searchByTitleAndAuthor(title, author));
+        } catch (WebClientResponseException e) {
             return Optional.empty();
         }
     }
 
-    private Optional<BookMetadata> getBookMetadataFromTitleAndAuthor(String title, String author) {
-        GoogleBooksResponse bookByTitleAndAuthor = googleBooksClient.searchByTitleAndAuthor(title, author);
-        if(bookByTitleAndAuthor != null && bookByTitleAndAuthor.getItems() != null &&
-                !(bookByTitleAndAuthor.getItems().isEmpty()) &&
-                bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo() != null) {
-            BookMetadata bookMetadata = new BookMetadata(
-                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getDescription(),
-                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getPublishedDate(),
-                    bookByTitleAndAuthor.getItems().getFirst().getVolumeInfo().getImageLinks().getThumbnail()
-            );
-            return Optional.of(bookMetadata);
+    /**
+     * Helper method to handle the deeply nested Google Books JSON structure safely.
+     */
+    private Optional<BookMetadata> mapToMetadata(GoogleBooksResponse response) {
+        if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+            return Optional.empty();
         }
-        return Optional.empty();
-    }
 
-    private Optional<BookMetadata> getBookMetadataFromIsbn(String isbn) {
-        GoogleBooksResponse bookByIsbn = googleBooksClient.searchByIsbn(isbn);
-        if (bookByIsbn != null && bookByIsbn.getItems() != null &&
-                !(bookByIsbn.getItems().isEmpty()) &&
-                bookByIsbn.getItems().getFirst().getVolumeInfo() != null) {
-            BookMetadata bookMetadata = new BookMetadata(
-                    bookByIsbn.getItems().getFirst().getVolumeInfo().getDescription(),
-                    bookByIsbn.getItems().getFirst().getVolumeInfo().getPublishedDate(),
-                    bookByIsbn.getItems().getFirst().getVolumeInfo().getImageLinks().getThumbnail()
-            );
-            return Optional.of(bookMetadata);
+        var firstItem = response.getItems().getFirst();
+        var volumeInfo = firstItem.getVolumeInfo();
+
+        if (volumeInfo == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        String thumb = (volumeInfo.getImageLinks() != null)
+                ? volumeInfo.getImageLinks().getThumbnail()
+                : null;
+
+        return Optional.of(new BookMetadata(
+                volumeInfo.getDescription(),
+                volumeInfo.getPublishedDate(),
+                thumb
+        ));
     }
 }

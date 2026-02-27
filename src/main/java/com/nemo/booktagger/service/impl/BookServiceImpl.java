@@ -4,17 +4,13 @@ import com.nemo.booktagger.client.BookMetadata;
 import com.nemo.booktagger.dao.repository.BookRepository;
 import com.nemo.booktagger.dao.repository.UserBookRepository;
 import com.nemo.booktagger.dao.repository.UserRepository;
-import com.nemo.booktagger.dao.specification.UserBookSpecifications;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
-import com.nemo.booktagger.rest.dto.request.UserBookFilterRequest;
-import com.nemo.booktagger.rest.dto.response.UserBookResponse;
 import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.GoogleBooksService;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
