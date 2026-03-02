@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,19 +23,13 @@ public class CsvImportController {
 
     @Operation(summary = "Import books from CSV")
     @PostMapping(
-            value = "/books",
+            value = "/{userId}/import", // More descriptive path
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<Integer> importCsvBooksIntoDb(
-            @Parameter(description = "Storygraph csv file", required = true)
-            @RequestParam("csv")MultipartFile file,
-
-            @Parameter(description = "User ID", required = true)
-            @RequestParam("userId") Integer userId
+            @PathVariable("userId") Integer userId,
+            @RequestParam("csv") MultipartFile file
     ) {
-        return ResponseEntity.ok(
-                csvImportService.importCsv(file, userId)
-        );
+        return ResponseEntity.ok(csvImportService.importCsv(file, userId));
     }
-
 }
