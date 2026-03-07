@@ -172,7 +172,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void testFindDistinctYearPublished() {
-        List<String> distinctYearPublished = userBookRepository.findDistinctYearPublished(testUser.getId());
+        List<String> distinctYearPublished = userBookRepository.findDistinctYearPublished(testUser.getId(), ReadingStatus.READ);
 
         assertEquals(1, distinctYearPublished.size(), "All test books published in 2025");
         String year = distinctYearPublished.getFirst();
@@ -181,7 +181,7 @@ public class UserBookRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void testGetAllUserLibraryData() {
-        List<Object[]> allUserLibraryData = userBookRepository.getAllUserLibraryData(testUser.getId());
+        List<Object[]> allUserLibraryData = userBookRepository.getAllUserLibraryData(testUser.getId(), ReadingStatus.READ);
 
         assertEquals(BOOK_COUNT * TAG_COUNT, allUserLibraryData.size(),
                 "Expected a row for each tag applied to each book");

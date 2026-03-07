@@ -4,6 +4,7 @@ import com.nemo.booktagger.base.BaseRepositoryTest;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
+import com.nemo.booktagger.enums.TagType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -66,5 +67,14 @@ public class BookTagRepositoryTest extends BaseRepositoryTest {
         Tag firstTag = testTags.getFirst();
         assertTrue(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(testUser.getId(), firstBook.getId(),
                 firstTag.getId()));
+    }
+
+    @Test
+    public void testGetDistinctTagTypes() {
+        List<TagType> distinctTagTypes = bookTagRepository.getDistinctTagTypes(testUser.getId());
+        for(BookTag bookTag: testBookTags) {
+            assertTrue(distinctTagTypes.contains(bookTag.getTag().getTagType()),
+                    "Tag type not present in distinctTagTypes");
+        }
     }
 }

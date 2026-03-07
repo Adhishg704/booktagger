@@ -170,24 +170,4 @@ public class BookServiceImplTest {
         verify(bookRepository, times(1)).getReferenceById(eq(book.getId()));
         verify(userBookRepository, times(1)).save(any(UserBook.class));
     }
-
-    @Test
-    public void testGetDistinctYearReadReturnsListOfYears() {
-        List<String> yearsRead = List.of("2025", "2024", "2023", "2022");
-        when(userBookRepository.findDistinctYearRead(user.getId())).thenReturn(yearsRead);
-
-        List<String> distinctYearRead = bookService.getDistinctYearRead(user.getId());
-
-        assertEquals(yearsRead.size(), distinctYearRead.size(), "Unexpected number of yearsRead");
-    }
-
-    @Test
-    public void testGetDistinctYearPublishedReturnsListOfYears() {
-        List<String> yearsPublished = List.of("2025", "2024", "2023", "2022");
-        when(userBookRepository.findDistinctYearPublished(user.getId())).thenReturn(yearsPublished);
-
-        List<String> distinctYearPublished = bookService.getDistinctYearPublished(user.getId());
-
-        assertEquals(yearsPublished.size(), distinctYearPublished.size(), "Unexpected number of yearsRead");
-    }
 }
