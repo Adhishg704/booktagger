@@ -83,11 +83,7 @@ public class BookServiceImpl implements BookService {
          }
 
         Optional<Book> byTitleAndAuthor = bookRepository.findByTitleAndAuthor(title, author);
-        if(byTitleAndAuthor.isPresent()) {
-            return byTitleAndAuthor.get();
-        }
-
-        return addBook(title, author, isbn);
+        return byTitleAndAuthor.orElseGet(() -> addBook(title, author, isbn));
     }
 
     @Override
@@ -108,15 +104,5 @@ public class BookServiceImpl implements BookService {
         userBook.setRating(rating);
 
         return userBookRepository.save(userBook);
-    }
-
-    @Override
-    public List<String> getDistinctYearPublished(Integer userId) {
-        return userBookRepository.findDistinctYearPublished(userId);
-    }
-
-    @Override
-    public List<String> getDistinctYearRead(Integer userId) {
-        return userBookRepository.findDistinctYearRead(userId);
     }
 }

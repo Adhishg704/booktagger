@@ -13,8 +13,4 @@ public interface BookService {
     Book getOrCreateBook(String title, String author, String isbn);
 
     UserBook addUserBook(Integer userId, Integer bookId, String yearRead, ReadingStatus status, Double rating);
-
-    List<String> getDistinctYearPublished(Integer userId);
-
-    List<String> getDistinctYearRead(Integer userId);
 }

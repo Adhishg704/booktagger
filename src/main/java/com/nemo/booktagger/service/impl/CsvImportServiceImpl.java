@@ -6,6 +6,7 @@ import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +24,7 @@ public class CsvImportServiceImpl implements CsvImportService {
     }
 
     @Override
+    @CacheEvict(value = "userLibrary", key = "#userId")
     public Integer importCsv(MultipartFile file, Integer userId) {
         CsvToBean<StoryGraphBookCsvRow> bookCsvParser = createBookCsvParser(file);
         Iterator<StoryGraphBookCsvRow> it = bookCsvParser.iterator();

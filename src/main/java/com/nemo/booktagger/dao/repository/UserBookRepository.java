@@ -43,11 +43,13 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer>, Jp
     @Query("""
             select distinct ub.book.yearPublished
             from UserBook ub
+            join ub.book b
             where ub.user.id = :userId
+              and ub.status = :status
               and ub.book.yearPublished is not null
             order by ub.book.yearPublished desc
             """)
-    List<String> findDistinctYearPublished(@Param("userId") Integer userId);
+    List<String> findDistinctYearPublished(@Param("userId") Integer userId, @Param("status") ReadingStatus status);
 
     @Query("""
             select ub, bt
@@ -57,6 +59,8 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer>, Jp
             and bt.book.id=b.id
             left join fetch tag t
             where ub.user.id=:userId
+            and ub.status=:status
             """)
-    List<Object[]> getAllUserLibraryData(@Param("userId") Integer userId);
+    List<Object[]> getAllUserLibraryData(@Param("userId") Integer userId,
+                                         @Param("status") ReadingStatus status);
 }

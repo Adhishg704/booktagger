@@ -34,7 +34,7 @@ public class Book {
     @Column(name = "author")
     private String author;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "isbn", unique = true)
