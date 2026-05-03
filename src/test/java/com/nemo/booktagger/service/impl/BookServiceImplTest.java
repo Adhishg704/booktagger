@@ -11,16 +11,12 @@ import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.factory.BookFactory;
 import com.nemo.booktagger.factory.UserFactory;
-import com.nemo.booktagger.service.GoogleBooksService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -42,9 +38,6 @@ public class BookServiceImplTest {
 
     @Mock
     private BookTagRepository bookTagRepository;
-
-    @Mock
-    private GoogleBooksService googleBooksService;
 
     @InjectMocks
     private BookServiceImpl bookService;
@@ -89,7 +82,6 @@ public class BookServiceImplTest {
                 "message");
         verify(bookRepository, times(1)).existsByIsbn(eq(isbn));
         verify(bookRepository, never()).save(any());
-        verify(googleBooksService, never()).getBookMetadataFromGoogleBooks(any(), any(), any());
     }
 
     @Test
@@ -99,8 +91,6 @@ public class BookServiceImplTest {
         book.setAuthor("Author");
         book.setIsbn("1234567891");
         BookMetadata bookMetadata = new BookMetadata("Description", "2025", "Thumbnail");
-        when(googleBooksService.getBookMetadataFromGoogleBooks(eq(book.getIsbn()), eq(book.getTitle()),
-                eq(book.getAuthor()))).thenReturn(Optional.of(bookMetadata));
         when(bookRepository.existsByIsbn(eq(book.getIsbn()))).thenReturn(false);
         when(bookRepository.existsByTitleAndAuthor(eq(book.getTitle()), eq(book.getAuthor()))).thenReturn(false);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -118,8 +108,6 @@ public class BookServiceImplTest {
         verify(bookRepository, times(1)).existsByTitleAndAuthor(eq(book.getTitle()),
                 eq(book.getAuthor()));
         verify(bookRepository, times(1)).save(any(Book.class));
-        verify(googleBooksService, times(1)).getBookMetadataFromGoogleBooks(eq(book.getIsbn()), eq(book.getTitle()),
-                eq(book.getAuthor()));
     }
 
     @Test
@@ -128,8 +116,6 @@ public class BookServiceImplTest {
         book.setTitle("Title");
         book.setAuthor("Author");
         book.setIsbn("1234567891");
-        when(googleBooksService.getBookMetadataFromGoogleBooks(eq(book.getIsbn()), eq(book.getTitle()),
-                eq(book.getAuthor()))).thenReturn(Optional.empty());
         when(bookRepository.existsByIsbn(eq(book.getIsbn()))).thenReturn(false);
         when(bookRepository.existsByTitleAndAuthor(eq(book.getTitle()), eq(book.getAuthor()))).thenReturn(false);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -147,8 +133,6 @@ public class BookServiceImplTest {
         verify(bookRepository, times(1)).existsByTitleAndAuthor(eq(book.getTitle()),
                 eq(book.getAuthor()));
         verify(bookRepository, times(1)).save(any(Book.class));
-        verify(googleBooksService, times(1)).getBookMetadataFromGoogleBooks(eq(book.getIsbn()), eq(book.getTitle()),
-                eq(book.getAuthor()));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.nemo.booktagger.service.impl;
 
 import com.nemo.booktagger.client.BookMetadata;
+import com.nemo.booktagger.client.BookMetadataProvider;
 import com.nemo.booktagger.dao.repository.BookRepository;
 import com.nemo.booktagger.dao.repository.UserBookRepository;
 import com.nemo.booktagger.dao.repository.UserRepository;
@@ -9,11 +10,9 @@ import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.service.BookService;
-import com.nemo.booktagger.service.GoogleBooksService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,15 +21,14 @@ public class BookServiceImpl implements BookService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final UserBookRepository userBookRepository;
-
-    private final GoogleBooksService googleBooksService;
+    private final BookMetadataProvider bookMetadataProvider;
 
     public BookServiceImpl(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository,
-                           GoogleBooksService googleBooksService) {
+                           BookMetadataProvider bookMetadataProvider) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository = userBookRepository;
-        this.googleBooksService = googleBooksService;
+        this.bookMetadataProvider = bookMetadataProvider;
     }
 
     @Override
@@ -43,30 +41,25 @@ public class BookServiceImpl implements BookService {
             bookRepository.existsByTitleAndAuthor(title, author)) {
             throw new RuntimeException("Book already exists");
         }
-        Optional<BookMetadata> bookMetadata = googleBooksService.
-                getBookMetadataFromGoogleBooks(isbn, title, author);
 
-        String description = null;
-        String yearPublished = null;
-        String thumbnailURL = null;
-
-        if(bookMetadata.isPresent()) {
-            description = bookMetadata.get().getDescription();
-            thumbnailURL = bookMetadata.get().getThumbnailURL();
-            String date = bookMetadata.get().getPublishedDate();
-
-            if(date != null && date.length() >= 4) {
-                yearPublished = date.substring(0, 4);
-            }
-        }
+        BookMetadata metadata = bookMetadataProvider.search(isbn, title, author).map(
+                result -> {
+                    String desc = bookMetadataProvider.fetchDescription(result.providerId()).orElse(null);
+                    return new BookMetadata(
+                            desc,
+                            result.yearPublished() != null? Integer.toString(result.yearPublished()): null,
+                            result.coverURL()
+                    );
+                }
+        ).orElse(new BookMetadata(null, null, null));
 
         Book book = new Book(
                 title,
                 author,
-                description,
+                metadata.getDescription(),
                 isbn,
-                yearPublished,
-                thumbnailURL
+                metadata.getPublishedDate(),
+                metadata.getThumbnailURL()
         );
         bookRepository.save(book);
         return book;

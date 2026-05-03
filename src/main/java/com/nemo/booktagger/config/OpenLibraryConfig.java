@@ -5,13 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class GoogleBooksConfig {
+public class OpenLibraryConfig {
 
     @Bean
-    public WebClient googleBooksWebClient() {
+    public WebClient openLibraryWebClient() {
         return WebClient
                 .builder()
-                .baseUrl("https://www.googleapis.com/books/v1")
+                .baseUrl("https://openlibrary.org")
                 .build();
     }
 }
