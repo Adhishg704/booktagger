@@ -9,10 +9,12 @@ import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.rest.dto.response.EnrichedBook;
 import com.nemo.booktagger.service.BookService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -97,5 +99,20 @@ public class BookServiceImpl implements BookService {
         userBook.setRating(rating);
 
         return userBookRepository.save(userBook);
+    }
+
+    @Override
+    @Transactional
+    public void embedBook(EnrichedBook enrichedBook, float[] vector) {
+        Book dbBook = bookRepository.findById(enrichedBook.bookId())
+                .orElseThrow();
+        dbBook.setEmbedding(vector);
+
+        bookRepository.save(dbBook);
+    }
+
+    @Override
+    public List<Integer> getSimilarBooksFromLibrary(Integer userId, float[] userQueryEmbedded) {
+        return bookRepository.retrieveBookIdsSimilarToUserQuery(userId, userQueryEmbedded);
     }
 }

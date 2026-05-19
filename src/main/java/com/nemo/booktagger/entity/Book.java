@@ -11,6 +11,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Array;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "books",
@@ -45,6 +48,11 @@ public class Book {
 
     @Column(name = "thumbnail")
     private String thumbnailURL;
+
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Array(length = 1536)
+    @Column(name = "embedding", columnDefinition = "vector(1536)")
+    private float[] embedding;
 
     public Book(String title, String author, String description, String isbn, String yearPublished, String thumbnailURL) {
         this.title = title;

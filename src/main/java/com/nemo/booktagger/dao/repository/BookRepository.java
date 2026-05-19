@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Integer> {
@@ -22,6 +23,19 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     @Query("select b.yearPublished from Book b where b.id=:bookId")
     Optional<String> findYearPublishedById(@Param("bookId") Integer bookId);
+
+    @Query(value = """
+        SELECT b.id
+        FROM books b
+        JOIN user_books ub ON ub.book_id = b.id
+        WHERE ub.user_id = :userId
+        ORDER BY b.embedding <=> CAST(:queryVector AS vector)
+        LIMIT 10
+        """, nativeQuery = true)
+    List<Integer> retrieveBookIdsSimilarToUserQuery(
+            @Param("userId") Integer userId,
+            @Param("queryVector") float[] queryVector
+    );
 
     Optional<Book> findByIsbn(String isbn);
 
