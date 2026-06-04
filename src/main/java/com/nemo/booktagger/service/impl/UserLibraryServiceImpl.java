@@ -54,6 +54,7 @@ public class UserLibraryServiceImpl implements UserLibraryService {
 
             if (response == null) {
                 response = new UserBookDetailedResponse(
+                        book.getId(),
                         book.getTitle(),
                         book.getAuthor(),
                         book.getYearPublished(),
@@ -98,6 +99,7 @@ public class UserLibraryServiceImpl implements UserLibraryService {
             Book book = userBook.getBook();
 
             UserBookDetailedResponse response = masterBookMap.computeIfAbsent(book.getId(), k -> new UserBookDetailedResponse(
+                    book.getId(),
                     book.getTitle(),
                     book.getAuthor(),
                     book.getYearPublished(),

@@ -33,4 +33,12 @@ public class AiEnrichmentController {
         return aiEnrichmentService.getMatchingBooks(userId, query);
     }
 
+    @GetMapping("/explain/{userId}")
+    public String explainBookRecommendation(
+            @PathVariable Integer userId,
+            @RequestParam Integer bookId,
+            @RequestParam String query
+    ) {
+        return aiEnrichmentService.getReasonForRecommendationFromAI(userId, bookId, query);
+    }
 }

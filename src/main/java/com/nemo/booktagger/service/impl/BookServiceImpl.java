@@ -9,7 +9,7 @@ import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
-import com.nemo.booktagger.rest.dto.response.EnrichedBook;
+import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.service.BookService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -79,6 +79,17 @@ public class BookServiceImpl implements BookService {
 
         Optional<Book> byTitleAndAuthor = bookRepository.findByTitleAndAuthor(title, author);
         return byTitleAndAuthor.orElseGet(() -> addBook(title, author, isbn));
+    }
+
+    @Override
+    public Book getBookById(Integer bookId) {
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+    }
+
+    @Override
+    public Book getBookReferenceById(Integer bookId) {
+        return bookRepository.getReferenceById(bookId);
     }
 
     @Override

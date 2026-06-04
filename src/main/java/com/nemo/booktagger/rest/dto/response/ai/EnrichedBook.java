@@ -1,4 +1,4 @@
-package com.nemo.booktagger.rest.dto.response;
+package com.nemo.booktagger.rest.dto.response.ai;
 
 import java.util.List;
 

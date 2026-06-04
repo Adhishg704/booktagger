@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record UserBookDetailedResponse(
+        Integer id,
         String title,
         String author,
         String yearPublished,
