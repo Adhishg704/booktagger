@@ -9,9 +9,12 @@ import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.event.EnrichBookEvent;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.service.BookService;
 import jakarta.transaction.Transactional;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,13 +27,15 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final UserBookRepository userBookRepository;
     private final BookMetadataProvider bookMetadataProvider;
+    private final KafkaTemplate<String, EnrichBookEvent> kafkaEnrichTemplate;
 
     public BookServiceImpl(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository,
-                           BookMetadataProvider bookMetadataProvider) {
+                           BookMetadataProvider bookMetadataProvider, KafkaTemplate<String, EnrichBookEvent> enrichBookEventKafkaTemplate) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository = userBookRepository;
         this.bookMetadataProvider = bookMetadataProvider;
+        kafkaEnrichTemplate = enrichBookEventKafkaTemplate;
     }
 
     @Override
@@ -44,7 +49,36 @@ public class BookServiceImpl implements BookService {
             throw new RuntimeException("Book already exists");
         }
 
-        BookMetadata metadata = bookMetadataProvider.search(isbn, title, author).map(
+        Book book = new Book(
+                title,
+                author,
+                null,
+                isbn,
+                null,
+                null
+        );
+
+        bookRepository.save(book);
+
+        kafkaEnrichTemplate.send("enrich-book", new EnrichBookEvent(book.getId()));
+
+        return book;
+    }
+
+    @Override
+    @Transactional
+    @KafkaListener(topics = "enrich-book")
+    public void enrichBook(EnrichBookEvent enrichBookEvent) {
+        Book book = getBookById(enrichBookEvent.bookId());
+        BookMetadata bookMetadata = fetchBookMetadata(book.getTitle(), book.getAuthor(), book.getIsbn());
+
+        book.setDescription(bookMetadata.getDescription());
+        book.setThumbnailURL(bookMetadata.getThumbnailURL());
+        book.setYearPublished(bookMetadata.getPublishedDate());
+    }
+
+    private BookMetadata fetchBookMetadata(String title, String author, String isbn) {
+        return bookMetadataProvider.search(isbn, title, author).map(
                 result -> {
                     String desc = bookMetadataProvider.fetchDescription(result.providerId()).orElse(null);
                     return new BookMetadata(
@@ -54,17 +88,6 @@ public class BookServiceImpl implements BookService {
                     );
                 }
         ).orElse(new BookMetadata(null, null, null));
-
-        Book book = new Book(
-                title,
-                author,
-                metadata.getDescription(),
-                isbn,
-                metadata.getPublishedDate(),
-                metadata.getThumbnailURL()
-        );
-        bookRepository.save(book);
-        return book;
     }
 
     @Transactional
@@ -125,5 +148,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Integer> getSimilarBooksFromLibrary(Integer userId, float[] userQueryEmbedded) {
         return bookRepository.retrieveBookIdsSimilarToUserQuery(userId, userQueryEmbedded);
+    }
+
+    @Override
+    public boolean isBookAlreadySavedForUser(Integer userId, String isbn) {
+        return userBookRepository.existsByUser_IdAndBook_Isbn(userId, isbn);
     }
 }

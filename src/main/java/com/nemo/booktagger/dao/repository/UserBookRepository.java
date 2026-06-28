@@ -57,10 +57,12 @@ public interface UserBookRepository extends JpaRepository<UserBook, Integer>, Jp
             join fetch ub.book b
             left join BookTag bt on bt.user.id=ub.user.id
             and bt.book.id=b.id
-            left join fetch tag t
+            left join fetch bt.tag t
             where ub.user.id=:userId
             and ub.status=:status
             """)
     List<Object[]> getAllUserLibraryData(@Param("userId") Integer userId,
                                          @Param("status") ReadingStatus status);
+
+    boolean existsByUser_IdAndBook_Isbn(Integer userId, String isbn);
 }

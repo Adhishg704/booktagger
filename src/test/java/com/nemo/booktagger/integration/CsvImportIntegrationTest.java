@@ -1,8 +1,11 @@
 package com.nemo.booktagger.integration;
 
+import com.nemo.booktagger.entity.Job;
 import com.nemo.booktagger.entity.User;
+import com.nemo.booktagger.event.ImportJobEvent;
 import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.CsvImportService;
+import com.nemo.booktagger.service.JobService;
 import com.nemo.booktagger.service.TagService;
 import com.nemo.booktagger.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -34,9 +37,13 @@ public class CsvImportIntegrationTest {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private JobService jobService;
+
     @Test
     public void testBooksImportedFromCsvIntoDb() throws IOException {
         User user = userService.createUser("user123", "user1239o3@gmail.com");
+        Job job = jobService.createJob(STORYGRAPH_ROWS, user.getId());
 
         ClassPathResource resource = new ClassPathResource("Storygraph_library.csv");
         MockMultipartFile file = new MockMultipartFile(
@@ -46,8 +53,8 @@ public class CsvImportIntegrationTest {
                 resource.getInputStream()
         );
 
-        int imported = csvImportService.importCsv(file, user.getId());
+        csvImportService.importCsv(new ImportJobEvent(job.getId(), user.getPassword()));
 
-        assertEquals(STORYGRAPH_ROWS, imported, "Unexpected number of books imported");
+        assertEquals(STORYGRAPH_ROWS, job.getProcessed(), "Unexpected number of books imported");
     }
 }

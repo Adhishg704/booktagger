@@ -29,6 +29,10 @@ public class CsvRowImportServiceImpl implements CsvRowImportService {
     @Override
     @Transactional
     public void processRow(Integer userId, StoryGraphBookCsvRow row) {
+        String isbn = row.getIsbn();
+        if (bookService.isBookAlreadySavedForUser(userId, isbn)) {
+            return;
+        }
         Book book = saveBook(row);
         saveUserBook(userId, book.getId(), row);
         saveMoodTags(userId, book.getId(), row);

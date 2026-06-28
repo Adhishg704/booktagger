@@ -5,18 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nemo.booktagger.entity.AiEmbeddedBook;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
+import com.nemo.booktagger.entity.Job;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.entity.UserBook;
+import com.nemo.booktagger.event.EmbeddingJobEvent;
 import com.nemo.booktagger.rest.dto.request.GeminiEnrichmentInput;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.rest.dto.response.common.UserBookDetailedResponse;
 import com.nemo.booktagger.service.AiEmbeddedBookService;
 import com.nemo.booktagger.service.AiEnrichmentService;
 import com.nemo.booktagger.service.BookService;
+import com.nemo.booktagger.service.JobService;
 import com.nemo.booktagger.service.UserLibraryCacheService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +39,9 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
     private final ObjectMapper objectMapper;
     private final BookService bookService;
     private final AiEmbeddedBookService aiEmbeddedBookService;
+    private final JobService jobService;
+
+    private static final int BATCH_SIZE = 10;
 
     private static final List<String> GENRES = List.of(
             "fantasy", "science fiction", "romance", "mystery", "thriller",
@@ -43,25 +51,51 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
 
     public AiEnrichmentServiceImpl(UserLibraryCacheService userLibraryCacheService, ChatClient chatClient,
                                    EmbeddingModel embeddingModel, ObjectMapper objectMapper, BookService bookService,
-                                   AiEmbeddedBookService aiEmbeddedBookService) {
+                                   AiEmbeddedBookService aiEmbeddedBookService, JobService jobService) {
         this.userLibraryCacheService = userLibraryCacheService;
         this.chatClient = chatClient;
         this.embeddingModel = embeddingModel;
         this.objectMapper = objectMapper;
         this.bookService = bookService;
         this.aiEmbeddedBookService = aiEmbeddedBookService;
+        this.jobService = jobService;
     }
 
     @Override
-    public void createEmbeddingsUsingGemini(Integer userId) {
+    @KafkaListener(topics = "embed-books")
+    public void createEmbeddingsUsingGemini(EmbeddingJobEvent embeddingJobEvent) {
+
+        Integer jobId = embeddingJobEvent.jobId();
+        jobService.markRunning(jobId);
+        Integer userId = embeddingJobEvent.userId();
+
         List<Object[]> userLibrary = userLibraryCacheService.getUserLibrary(userId);
         List<GeminiEnrichmentInput> allBooksGeminiInput = mapToDTO(userLibrary);
-        List<List<GeminiEnrichmentInput>> geminiInputBatches = batchGeminiInputsWithBatchSize(allBooksGeminiInput, 10);
+        jobService.updateTotal(jobId, allBooksGeminiInput.size());
+        List<List<GeminiEnrichmentInput>> geminiInputBatches = batchGeminiInputsWithBatchSize(allBooksGeminiInput, BATCH_SIZE);
 
+        int processed = 0;
+
+        boolean failed = false;
         for (List<GeminiEnrichmentInput> geminiInputBatch : geminiInputBatches) {
-            String response = callGemini(getEmbeddingPrompt(geminiInputBatch));
-            List<EnrichedBook> books = parseEmbeddingResponse(response);
-            embedBooksInBatch(books);
+            try {
+                String response = callGemini(getEmbeddingPrompt(geminiInputBatch));
+                List<EnrichedBook> books = parseEmbeddingResponse(response);
+                embedBooksInBatch(books);
+                processed += books.size();
+                jobService.updateProgress(jobId, processed);
+            }
+            catch (Exception e) {
+                log.error("Embedding failed for batch: " +  processed / BATCH_SIZE + e);
+                failed = true;
+            }
+        }
+
+        if (failed) {
+            jobService.markFailed(jobId);
+        }
+        else {
+            jobService.markCompleted(jobId);
         }
     }
 

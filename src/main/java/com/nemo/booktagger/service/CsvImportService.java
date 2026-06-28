@@ -1,7 +1,7 @@
 package com.nemo.booktagger.service;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.nemo.booktagger.event.ImportJobEvent;
 
 public interface CsvImportService {
-    Integer importCsv(MultipartFile file, Integer userId);
+    void importCsv(ImportJobEvent jobEvent);
 }

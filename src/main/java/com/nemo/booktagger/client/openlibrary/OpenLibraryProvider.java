@@ -7,7 +7,10 @@ import com.nemo.booktagger.client.openlibrary.dto.OpenLibraryWorkResponse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,11 +37,11 @@ public class OpenLibraryProvider implements BookMetadataProvider {
 
     @Override
     public Optional<String> fetchDescription(String workId) {
-        OpenLibraryWorkResponse response = openLibraryClient.get().uri(
+        OpenLibraryWorkResponse response = withRetry(openLibraryClient.get().uri(
                 uriBuilder -> uriBuilder.
                         path(workId + ".json").
                         build()
-        ).retrieve().bodyToMono(OpenLibraryWorkResponse.class).block();
+        ).retrieve().bodyToMono(OpenLibraryWorkResponse.class));
 
         if(response == null || response.description() == null) {
             return Optional.empty();
@@ -57,14 +60,14 @@ public class OpenLibraryProvider implements BookMetadataProvider {
     }
 
     private Optional<ProviderSearchResult> executeSearch(String query) {
-        OpenLibrarySearchResponse response = openLibraryClient.get().uri(
+        OpenLibrarySearchResponse response = withRetry(openLibraryClient.get().uri(
                 uriBuilder -> uriBuilder.
                         path("/search.json").
                         queryParam("q", query).
                         queryParam("limit", 1).
                         build()
 
-        ).retrieve().bodyToMono(OpenLibrarySearchResponse.class).block();
+        ).retrieve().bodyToMono(OpenLibrarySearchResponse.class));
 
         if(response == null || response.docs() == null || response.docs().isEmpty()) {
             return Optional.empty();
@@ -84,5 +87,11 @@ public class OpenLibraryProvider implements BookMetadataProvider {
             return null;
         }
         return "https://covers.openlibrary.org/b/id/" + coverI + "-L.jpg";
+    }
+
+    private <T> T withRetry(Mono<T> mono) {
+        return mono.retryWhen(
+                Retry.backoff(3, Duration.ofSeconds(2))
+        ).block();
     }
 }

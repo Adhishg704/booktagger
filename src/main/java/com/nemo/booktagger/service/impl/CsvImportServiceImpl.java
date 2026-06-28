@@ -1,52 +1,140 @@
 package com.nemo.booktagger.service.impl;
 
+import com.nemo.booktagger.entity.Job;
+import com.nemo.booktagger.event.ImportJobEvent;
+import com.nemo.booktagger.rest.controller.CsvImportController;
 import com.nemo.booktagger.service.CsvImportService;
 import com.nemo.booktagger.service.CsvRowImportService;
+import com.nemo.booktagger.service.JobService;
+import com.nemo.booktagger.service.StorageService;
 import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import org.springframework.cache.annotation.CacheEvict;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class CsvImportServiceImpl implements CsvImportService {
     private final CsvRowImportService csvRowImportService;
+    private final StorageService storageService;
+    private final JobService jobService;
+    private final CacheManager cacheManager;
+    private static final Logger log =
+            LoggerFactory.getLogger(CsvImportController.class);
 
-    public CsvImportServiceImpl(CsvRowImportService csvRowImportService) {
+    public CsvImportServiceImpl(CsvRowImportService csvRowImportService, StorageService storageService,
+                                JobService jobService, CacheManager cacheManager) {
         this.csvRowImportService = csvRowImportService;
+        this.storageService = storageService;
+        this.jobService = jobService;
+        this.cacheManager = cacheManager;
     }
 
     @Override
-    @CacheEvict(value = "userLibrary", key = "#userId")
-    public Integer importCsv(MultipartFile file, Integer userId) {
-        CsvToBean<StoryGraphBookCsvRow> bookCsvParser = createBookCsvParser(file);
-        Iterator<StoryGraphBookCsvRow> it = bookCsvParser.iterator();
-        int rows = 0;
+    @KafkaListener(topics = "import-books")
+    public void importCsv(ImportJobEvent jobEvent) {
+        Job job = jobService.getJob(jobEvent.jobId());
 
-        while(it.hasNext()) {
-            StoryGraphBookCsvRow row = it.next();
-            csvRowImportService.processRow(userId, row);
-            rows ++;
+        try {
+            processImport(job, jobEvent.fileKey());
+        } catch (Exception e) {
+            jobService.markFailed(
+                    job.getId()
+            );
+        } finally {
+            deleteFile(jobEvent.fileKey());
         }
-
-        return rows;
     }
 
-    private CsvToBean<StoryGraphBookCsvRow> createBookCsvParser(MultipartFile file) {
+    private void processImport(
+            Job job,
+            String fileKey
+    ) {
+        jobService.markRunning(job.getId());
+
+        List<StoryGraphBookCsvRow> rows =
+                loadRows(fileKey);
+
+        jobService.updateTotal(
+                job.getId(),
+                rows.size()
+        );
+
+        importRows(job, rows);
+
+        jobService.markCompleted(job.getId());
+
+        evictUserLibraryCache(
+                job.getUserId()
+        );
+    }
+
+    private List<StoryGraphBookCsvRow> loadRows(
+            String fileKey
+    ) {
+        return createBookCsvParser(
+                storageService.download(fileKey)
+        ).parse();
+    }
+
+    private void importRows(
+            Job job,
+            List<StoryGraphBookCsvRow> rows
+    ) {
+        int processed = 0;
+
+        for (StoryGraphBookCsvRow row : rows) {
+            csvRowImportService.processRow(
+                    job.getUserId(),
+                    row
+            );
+
+            processed++;
+
+            jobService.updateProgress(
+                    job.getId(),
+                    processed
+            );
+        }
+    }
+
+    private void evictUserLibraryCache(
+            Integer userId
+    ) {
+        Cache cache = cacheManager.getCache("userLibrary");
+
+        if (cache != null) {
+            cache.evict(userId);
+        }
+    }
+
+    private void deleteFile(
+            String fileKey
+    ) {
+        try {
+            storageService.delete(fileKey);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private CsvToBean<StoryGraphBookCsvRow> createBookCsvParser(InputStream file) {
         HeaderColumnNameMappingStrategy<StoryGraphBookCsvRow> strategy =
                 new HeaderColumnNameMappingStrategy<>();
         strategy.setType(StoryGraphBookCsvRow.class);
 
         try {
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(file.getInputStream())
+                    new InputStreamReader(file)
             );
 
             return new CsvToBeanBuilder<StoryGraphBookCsvRow>(reader)
@@ -54,7 +142,7 @@ public class CsvImportServiceImpl implements CsvImportService {
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
         }
-        catch(IOException e) {
+        catch(Exception e) {
             throw new RuntimeException("Failed to read csv: " + e);
         }
     }
