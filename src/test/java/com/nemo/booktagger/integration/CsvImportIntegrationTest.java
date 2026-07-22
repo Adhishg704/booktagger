@@ -33,6 +33,7 @@ public class CsvImportIntegrationTest {
     @Autowired
     private JobService jobService;
 
+    @SuppressWarnings("unused")
     @Test
     public void testBooksImportedFromCsvIntoDb() throws IOException {
         User user = userService.createUser("user123", "user1239o3@gmail.com");

@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -125,7 +124,7 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
         return batchedBooks;
     }
 
-    private String callGemini(@NonNull String prompt) {
+    private String callGemini(String prompt) {
         try {
             return chatClient.prompt()
                     .system("You are a strict JSON generator. Output only valid JSON")
