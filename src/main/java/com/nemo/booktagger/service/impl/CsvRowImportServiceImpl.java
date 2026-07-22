@@ -8,7 +8,6 @@ import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.CsvRowImportService;
 import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.nemo.booktagger.service.TagService;
-import com.nemo.booktagger.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +15,10 @@ import java.util.Arrays;
 
 @Service
 public class CsvRowImportServiceImpl implements CsvRowImportService {
-    private final UserService userService;
     private final BookService bookService;
     private final TagService tagService;
 
-    public CsvRowImportServiceImpl(UserService userService, BookService bookService, TagService tagService) {
-        this.userService = userService;
+    public CsvRowImportServiceImpl(BookService bookService, TagService tagService) {
         this.bookService = bookService;
         this.tagService = tagService;
     }

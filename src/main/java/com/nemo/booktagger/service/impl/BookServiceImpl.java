@@ -12,6 +12,7 @@ import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.event.EnrichBookEvent;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.service.BookService;
+import com.nemo.booktagger.service.UserLibraryCacheService;
 import jakarta.transaction.Transactional;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,14 +29,17 @@ public class BookServiceImpl implements BookService {
     private final UserBookRepository userBookRepository;
     private final BookMetadataProvider bookMetadataProvider;
     private final KafkaTemplate<String, EnrichBookEvent> kafkaEnrichTemplate;
+    private final UserLibraryCacheService userLibraryCacheService;
 
     public BookServiceImpl(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository,
-                           BookMetadataProvider bookMetadataProvider, KafkaTemplate<String, EnrichBookEvent> enrichBookEventKafkaTemplate) {
+                           BookMetadataProvider bookMetadataProvider, KafkaTemplate<String, EnrichBookEvent> enrichBookEventKafkaTemplate,
+                           UserLibraryCacheService userLibraryCacheService) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository = userBookRepository;
         this.bookMetadataProvider = bookMetadataProvider;
         kafkaEnrichTemplate = enrichBookEventKafkaTemplate;
+        this.userLibraryCacheService = userLibraryCacheService;
     }
 
     @Override
@@ -60,8 +64,6 @@ public class BookServiceImpl implements BookService {
 
         bookRepository.save(book);
 
-        kafkaEnrichTemplate.send("enrich-book", new EnrichBookEvent(book.getId()));
-
         return book;
     }
 
@@ -75,6 +77,8 @@ public class BookServiceImpl implements BookService {
         book.setDescription(bookMetadata.getDescription());
         book.setThumbnailURL(bookMetadata.getThumbnailURL());
         book.setYearPublished(bookMetadata.getPublishedDate());
+
+        userLibraryCacheService.invalidate(enrichBookEvent.userId());
     }
 
     private BookMetadata fetchBookMetadata(String title, String author, String isbn) {
@@ -132,7 +136,14 @@ public class BookServiceImpl implements BookService {
         userBook.setStatus(status);
         userBook.setRating(rating);
 
-        return userBookRepository.save(userBook);
+        UserBook savedUserBook = userBookRepository.save(userBook);
+
+        kafkaEnrichTemplate.send(
+                "enrich-book",
+                new EnrichBookEvent(book.getId(), userId)
+        );
+
+        return savedUserBook;
     }
 
     @Override

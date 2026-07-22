@@ -4,7 +4,6 @@ import com.nemo.booktagger.dao.repository.BookRepository;
 import com.nemo.booktagger.dao.repository.BookTagRepository;
 import com.nemo.booktagger.dao.repository.TagRepository;
 import com.nemo.booktagger.dao.repository.UserRepository;
-import com.nemo.booktagger.dao.specification.BookTagSpecifications;
 import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
@@ -13,7 +12,6 @@ import com.nemo.booktagger.enums.TagType;
 import com.nemo.booktagger.service.TagService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

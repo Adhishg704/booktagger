@@ -5,8 +5,6 @@ import com.nemo.booktagger.event.ImportJobEvent;
 import com.nemo.booktagger.service.JobService;
 import com.nemo.booktagger.service.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,8 +23,6 @@ public class CsvImportController {
     private final KafkaTemplate<String, ImportJobEvent> kafkaTemplate;
     private final JobService jobService;
     private final StorageService storageService;
-    private static final Logger log =
-            LoggerFactory.getLogger(CsvImportController.class);
 
     public CsvImportController(KafkaTemplate<String, ImportJobEvent> template, JobService jobService, StorageService storageService) {
         kafkaTemplate = template;

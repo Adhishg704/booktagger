@@ -3,10 +3,8 @@ package com.nemo.booktagger.integration;
 import com.nemo.booktagger.entity.Job;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.event.ImportJobEvent;
-import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.CsvImportService;
 import com.nemo.booktagger.service.JobService;
-import com.nemo.booktagger.service.TagService;
 import com.nemo.booktagger.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +29,6 @@ public class CsvImportIntegrationTest {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private BookService bookService;
-
-    @Autowired
-    private TagService tagService;
 
     @Autowired
     private JobService jobService;

@@ -1,10 +1,7 @@
 package com.nemo.booktagger.service;
 
-import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.ReadingStatus;
-
-import java.util.List;
 
 public interface UserService {
     User getUserById(Integer userId);

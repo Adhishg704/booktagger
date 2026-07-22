@@ -1,7 +1,6 @@
 package com.nemo.booktagger.client;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class BookMetadata {

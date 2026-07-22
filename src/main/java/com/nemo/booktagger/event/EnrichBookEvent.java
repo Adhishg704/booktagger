@@ -1,4 +1,4 @@
 package com.nemo.booktagger.event;
 
-public record EnrichBookEvent(Integer bookId) {
+public record EnrichBookEvent(Integer bookId, Integer userId) {
 }

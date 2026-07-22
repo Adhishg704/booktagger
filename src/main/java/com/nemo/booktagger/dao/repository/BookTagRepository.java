@@ -21,4 +21,16 @@ public interface BookTagRepository extends JpaRepository<BookTag, Integer>, JpaS
             """
     )
     List<TagType> getDistinctTagTypes(@Param("userId") Integer userId);
+
+    @Query("""
+    select distinct t.tagName
+    from BookTag bt
+    join bt.tag t
+    where bt.user.id = :userId
+      and t.tagType = :tagType
+    order by t.tagName
+    """)
+    List<String> getDistinctTagNamesByUserIdAndTagType(
+            @Param("userId") Integer userId,
+            @Param("tagType") TagType tagType);
 }

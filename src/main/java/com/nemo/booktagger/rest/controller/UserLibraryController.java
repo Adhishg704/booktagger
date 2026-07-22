@@ -1,11 +1,9 @@
 package com.nemo.booktagger.rest.controller;
 
+import com.nemo.booktagger.enums.TagType;
 import com.nemo.booktagger.enums.YearType;
 import com.nemo.booktagger.rest.dto.response.common.UserBookDetailedResponse;
-import com.nemo.booktagger.rest.dto.response.tags.TagDashboardResponse;
-import com.nemo.booktagger.rest.dto.response.years.YearlyDashboardResponse;
 import com.nemo.booktagger.service.UserLibraryService;
-import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,22 +19,6 @@ public class UserLibraryController {
 
     public UserLibraryController(UserLibraryService userLibraryService) {
         this.userLibraryService = userLibraryService;
-    }
-
-    @GetMapping("/{userId}/years")
-    public YearlyDashboardResponse getYearlyDashboardData(
-            @Parameter(description = "User ID", required = true)
-            @PathVariable("userId") Integer userId
-    ) {
-        return userLibraryService.getYearDashboardForUserLibrary(userId);
-    }
-
-    @GetMapping("/{userId}/tags")
-    public List<TagDashboardResponse> getTagDashboardData(
-            @Parameter(description = "User ID", required = true)
-            @PathVariable("userId") Integer userId
-    ) {
-        return userLibraryService.getTagDashboardForUserLibrary(userId);
     }
 
     @GetMapping("/{userId}/years-read")
@@ -72,7 +54,7 @@ public class UserLibraryController {
     @GetMapping("/{userId}/tag-names/{tagType}")
     public List<String> getTagNamesForType(
             @PathVariable("userId") Integer userId,
-            @PathVariable("tagType") String tagType
+            @PathVariable("tagType") TagType tagType
     ) {
         return userLibraryService.getTagNamesForUserForTagType(userId, tagType);
     }

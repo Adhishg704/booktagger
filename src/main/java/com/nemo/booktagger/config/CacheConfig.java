@@ -1,27 +1,41 @@
 package com.nemo.booktagger.config;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Configuration
 @EnableCaching
 public class CacheConfig {
 
     @Bean
-    public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("userLibrary");
-        cacheManager.setCaffeine(
-                Caffeine.newBuilder()
-                        .maximumSize(1000)
-                        .expireAfterWrite(30, TimeUnit.MINUTES)
-        );
+    public RedisCacheConfiguration redisCacheConfiguration() {
+        GenericJacksonJsonRedisSerializer serializer =
+                GenericJacksonJsonRedisSerializer.builder().
+                        enableUnsafeDefaultTyping().build();
 
-        return cacheManager;
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(30))
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.
+                                fromSerializer(serializer)
+                );
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(
+            RedisConnectionFactory connectionFactory,
+            RedisCacheConfiguration configuration) {
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(configuration)
+                .build();
     }
 }

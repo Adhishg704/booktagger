@@ -5,7 +5,6 @@ import com.nemo.booktagger.event.EmbeddingJobEvent;
 import com.nemo.booktagger.rest.dto.response.common.UserBookDetailedResponse;
 import com.nemo.booktagger.service.AiEnrichmentService;
 import com.nemo.booktagger.service.JobService;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;

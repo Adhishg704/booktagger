@@ -1,8 +1,10 @@
 package com.nemo.booktagger.service;
 
-import java.util.List;
+import com.nemo.booktagger.rest.dto.response.common.UserLibraryCache;
 
 public interface UserLibraryCacheService {
 
-    List<Object[]> getUserLibrary(Integer userId);
+    UserLibraryCache getUserLibrary(Integer userId);
+
+    void invalidate(Integer userId);
 }

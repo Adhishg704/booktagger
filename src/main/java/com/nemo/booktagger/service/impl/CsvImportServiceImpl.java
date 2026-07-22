@@ -2,7 +2,6 @@ package com.nemo.booktagger.service.impl;
 
 import com.nemo.booktagger.entity.Job;
 import com.nemo.booktagger.event.ImportJobEvent;
-import com.nemo.booktagger.rest.controller.CsvImportController;
 import com.nemo.booktagger.service.CsvImportService;
 import com.nemo.booktagger.service.CsvRowImportService;
 import com.nemo.booktagger.service.JobService;
@@ -11,8 +10,6 @@ import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -29,8 +26,6 @@ public class CsvImportServiceImpl implements CsvImportService {
     private final StorageService storageService;
     private final JobService jobService;
     private final CacheManager cacheManager;
-    private static final Logger log =
-            LoggerFactory.getLogger(CsvImportController.class);
 
     public CsvImportServiceImpl(CsvRowImportService csvRowImportService, StorageService storageService,
                                 JobService jobService, CacheManager cacheManager) {

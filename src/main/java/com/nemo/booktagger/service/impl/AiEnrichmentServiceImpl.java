@@ -3,11 +3,6 @@ package com.nemo.booktagger.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nemo.booktagger.entity.AiEmbeddedBook;
-import com.nemo.booktagger.entity.Book;
-import com.nemo.booktagger.entity.BookTag;
-import com.nemo.booktagger.entity.Job;
-import com.nemo.booktagger.entity.Tag;
-import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.event.EmbeddingJobEvent;
 import com.nemo.booktagger.rest.dto.request.GeminiEnrichmentInput;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
@@ -17,18 +12,19 @@ import com.nemo.booktagger.service.AiEnrichmentService;
 import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.JobService;
 import com.nemo.booktagger.service.UserLibraryCacheService;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,55 +63,55 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
 
         Integer jobId = embeddingJobEvent.jobId();
         jobService.markRunning(jobId);
+
         Integer userId = embeddingJobEvent.userId();
 
-        List<Object[]> userLibrary = userLibraryCacheService.getUserLibrary(userId);
-        List<GeminiEnrichmentInput> allBooksGeminiInput = mapToDTO(userLibrary);
+        List<UserBookDetailedResponse> userLibrary =
+                userLibraryCacheService.getUserLibrary(userId).books();
+
+        List<GeminiEnrichmentInput> allBooksGeminiInput =
+                mapToDTO(userLibrary);
+
         jobService.updateTotal(jobId, allBooksGeminiInput.size());
-        List<List<GeminiEnrichmentInput>> geminiInputBatches = batchGeminiInputsWithBatchSize(allBooksGeminiInput, BATCH_SIZE);
+
+        List<List<GeminiEnrichmentInput>> geminiInputBatches =
+                batchGeminiInputsWithBatchSize(allBooksGeminiInput, BATCH_SIZE);
 
         int processed = 0;
-
         boolean failed = false;
+
         for (List<GeminiEnrichmentInput> geminiInputBatch : geminiInputBatches) {
             try {
                 String response = callGemini(getEmbeddingPrompt(geminiInputBatch));
                 List<EnrichedBook> books = parseEmbeddingResponse(response);
+
                 embedBooksInBatch(books);
+
                 processed += books.size();
                 jobService.updateProgress(jobId, processed);
-            }
-            catch (Exception e) {
-                log.error("Embedding failed for batch: " +  processed / BATCH_SIZE + e);
+
+            } catch (Exception e) {
+                log.error("Embedding failed for batch: {}", processed / BATCH_SIZE, e);
                 failed = true;
             }
         }
 
         if (failed) {
             jobService.markFailed(jobId);
-        }
-        else {
+        } else {
             jobService.markCompleted(jobId);
         }
     }
 
-    private List<GeminiEnrichmentInput> mapToDTO(List<Object[]> userLibrary) {
-        Map<Integer, GeminiEnrichmentInput> bookIdToGeminiInputMap = new HashMap<>();
-
-        for (Object[] row : userLibrary) {
-            UserBook userBook = (UserBook) row[0];
-            Book book = userBook.getBook();
-
-            bookIdToGeminiInputMap.computeIfAbsent(book.getId(),
-                    k -> new GeminiEnrichmentInput(
-                            book.getId(),
-                            book.getTitle(),
-                            book.getAuthor(),
-                            book.getDescription()
-                    ));
-        }
-
-        return new ArrayList<>(bookIdToGeminiInputMap.values());
+    private List<GeminiEnrichmentInput> mapToDTO(List<UserBookDetailedResponse> userLibrary) {
+        return userLibrary.stream()
+                .map(book -> new GeminiEnrichmentInput(
+                        book.id(),
+                        book.title(),
+                        book.author(),
+                        book.description()
+                ))
+                .toList();
     }
 
     private List<List<GeminiEnrichmentInput>> batchGeminiInputsWithBatchSize(List<GeminiEnrichmentInput> allBooksGeminiInput, int batchSize) {
@@ -129,7 +125,7 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
         return batchedBooks;
     }
 
-    private String callGemini(String prompt) {
+    private String callGemini(@NonNull String prompt) {
         try {
             return chatClient.prompt()
                     .system("You are a strict JSON generator. Output only valid JSON")
@@ -305,14 +301,24 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
 
     @Override
     public List<UserBookDetailedResponse> getMatchingBooks(Integer userId, String userInput) {
-        List<UserBookDetailedResponse> results = new ArrayList<>();
-        Map<Integer, UserBookDetailedResponse> bookIdToUserBookDetailedResponseMap = createBookIdToUserBookDetailedResponseMap(userId);
-        float[] embeddedUserInput = embeddingModel.embed(userInput);
-        List<Integer> similarBooksFromLibrary = bookService.getSimilarBooksFromLibrary(userId, embeddedUserInput);
+        List<UserBookDetailedResponse> userLibrary = userLibraryCacheService.getUserLibrary(userId).books();
 
-        for(Integer bookId: similarBooksFromLibrary) {
-            if(bookIdToUserBookDetailedResponseMap.containsKey(bookId)) {
-                results.add(bookIdToUserBookDetailedResponseMap.get(bookId));
+        Map<Integer, UserBookDetailedResponse> booksById = userLibrary.stream()
+                .collect(Collectors.toMap(
+                        UserBookDetailedResponse::id,
+                        Function.identity()
+                ));
+
+        float[] embeddedUserInput = embeddingModel.embed(userInput);
+        List<Integer> similarBooksFromLibrary =
+                bookService.getSimilarBooksFromLibrary(userId, embeddedUserInput);
+
+        List<UserBookDetailedResponse> results = new ArrayList<>();
+
+        for (Integer bookId : similarBooksFromLibrary) {
+            UserBookDetailedResponse book = booksById.get(bookId);
+            if (book != null) {
+                results.add(book);
             }
         }
 
@@ -321,12 +327,6 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
 
     @Override
     public String getReasonForRecommendationFromAI(Integer userId, Integer bookId, String userInput) {
-        List<EnrichedBook> results = new ArrayList<>();
-        Map<Integer, UserBookDetailedResponse> bookIdToUserBookDetailedResponseMap = createBookIdToUserBookDetailedResponseMap(userId);
-        float[] embeddedUserInput = embeddingModel.embed(userInput);
-        List<Integer> similarBooksFromLibrary =
-                bookService.getSimilarBooksFromLibrary(userId, embeddedUserInput);
-
         AiEmbeddedBook aiEmbeddedBook =
                 aiEmbeddedBookService.getAiEmbeddedBook(bookId).orElse(null);
 
@@ -360,43 +360,6 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
         return Arrays.stream(value.split(", "))
                 .map(String::trim)
                 .toList();
-    }
-
-    private Map<Integer, UserBookDetailedResponse> createBookIdToUserBookDetailedResponseMap(Integer userId) {
-        List<Object[]> userLibrary = userLibraryCacheService.getUserLibrary(userId);
-        Map<Integer, UserBookDetailedResponse> bookIdToDetailedResponseMap = new HashMap<>();
-
-        for(Object[] userBookAndBookTag: userLibrary) {
-            UserBook userBook = (UserBook) userBookAndBookTag[0];
-            BookTag bookTag = (BookTag) userBookAndBookTag[1];
-            Book book = userBook.getBook();
-
-            UserBookDetailedResponse response = bookIdToDetailedResponseMap.computeIfAbsent(book.getId(),
-                    k -> new UserBookDetailedResponse(
-                            book.getId(),
-                            book.getTitle(),
-                            book.getAuthor(),
-                            book.getYearPublished(),
-                            userBook.getYearRead(),
-                            book.getDescription(),
-                            book.getThumbnailURL(),
-                            userBook.getRating(),
-                            new ArrayList<>()
-                    ));
-
-            if(bookTag == null || bookTag.getTag() == null) {
-                continue;
-            }
-
-            Tag tag = bookTag.getTag();
-            String tagName = tag.getTagName();
-
-            if(!response.tags().contains(tagName)) {
-                response.tags().add(tagName);
-            }
-        }
-
-        return bookIdToDetailedResponseMap;
     }
 
     private <T> List<T> parseListResponse(String response, TypeReference<List<T>> typeReference) {
