@@ -268,27 +268,38 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
             String bookJson = objectMapper.writeValueAsString(book);
 
             return """
-        You are a book recommendation explainer.
+            You are explaining why a book was recommended by a semantic book recommendation system.
 
-        USER QUERY:
-        %s
+            USER'S REQUEST:
+            %s
 
-        BOOK:
-        %s
+            BOOK INFORMATION:
+            %s
 
-        TASK:
-        Explain why this book matches the user query.
+            TASK:
+            Explain briefly why this specific book is a relevant recommendation for the user's request.
 
-        RULES:
-        - 2–3 sentences only
-        - Focus on themes, tone, emotional match
-        - Be specific, not generic
-        - Do NOT repeat metadata
-        - Do NOT be verbose
+            RULES:
+            - Compare the user's request directly against this specific book.
+            - Identify the 1–2 strongest points of overlap between the request and the book.
+            - Focus on themes, tone, atmosphere, emotional qualities, subject matter, reading experience, or relevant tags.
+            - Be specific to THIS book. The explanation should not sound interchangeable with an explanation for another book.
+            - Base the explanation primarily on the provided book information.
+            - You may use generally known knowledge about the book when it helps explain the match.
+            - Do not invent specific plot details, themes, characteristics, or reading experiences.
+            - If the match is imperfect, explain the strongest connection instead of pretending the book is a perfect match.
+            - Do not simply repeat the user's request using different words.
+            - Do not mention semantic search, embeddings, similarity scores, or recommendation algorithms.
+            - Do not repeat basic metadata such as title, author, ISBN, publication year, or rating unless directly relevant to the user's request.
+            - Avoid generic phrases such as "aligns perfectly with your request", "perfectly matches", "is an excellent choice", or "this book is perfect for you".
+            - Avoid generic claims such as "complex characters" or "deep themes" unless they are specifically relevant to the user's request and supported by the book.
+            - Do not use the absence of information as evidence. For example, do not claim that a book has little violence, no romance, or no horror unless that is reasonably supported by the available information or general knowledge.
+            - 2–3 sentences maximum.
+            - Make the explanation natural and conversational rather than formulaic.
 
-        OUTPUT:
-        Return plain text only (no JSON, no markdown)
-        """.formatted(userInput, bookJson);
+            OUTPUT:
+            Return only the explanation as plain text.
+            """.formatted(userInput, bookJson);
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to build explanation prompt", e);

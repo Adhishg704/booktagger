@@ -1,6 +1,5 @@
 package com.nemo.booktagger.service.impl;
 
-import com.nemo.booktagger.client.BookMetadata;
 import com.nemo.booktagger.dao.repository.BookRepository;
 import com.nemo.booktagger.dao.repository.BookTagRepository;
 import com.nemo.booktagger.dao.repository.UserBookRepository;
