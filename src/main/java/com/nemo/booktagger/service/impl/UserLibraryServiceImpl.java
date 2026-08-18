@@ -64,7 +64,6 @@ public class UserLibraryServiceImpl implements UserLibraryService {
     @Override
     public List<UserBookDetailedResponse> getUserBooksByTagName(Integer userId, String tagName) {
         List<UserBookDetailedResponse> userBookDetailedResponses = userLibraryCacheService.getUserLibrary(userId).books();
-        System.out.println(userBookDetailedResponses.get(0).getClass());
 
         return userBookDetailedResponses
                 .stream()

@@ -11,10 +11,13 @@ import com.nemo.booktagger.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +74,88 @@ public class CsvRowImportServiceImplTest {
         verify(bookService).addUserBook(commonId, commonId, row.getDateRead().substring(0, 4),
                 ReadingStatus.READ, row.getRating());
         verify(tagService, times(3)).createBookTag(commonId, commonId, commonId);
+    }
+
+    @Test
+    public void testProcessRowSkipsEverythingWhenBookAlreadySavedForUser() {
+        setRowFields("Dune", "Frank Herbert", "123", "read", "2023-05-01", 4.5, "dark", "fast");
+        when(bookService.isBookAlreadySavedForUser(commonId, row.getIsbn())).thenReturn(true);
+
+        csvRowImportService.processRow(commonId, row);
+
+        verify(bookService, never()).getOrCreateBook(any(), any(), any());
+        verify(bookService, never()).addUserBook(anyInt(), anyInt(), any(), any(), anyDouble());
+        verifyNoInteractions(tagService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "to-read, TO_READ",
+            "did-not-finish, DNF",
+            "currently-reading, CURRENTLY_READING"
+    })
+    public void testProcessRowMapsAllKnownReadingStatuses(String csvStatus, ReadingStatus expectedStatus) {
+        setRowFields("Dune", "Frank Herbert", "123", csvStatus, "2023-05-01", 4.5, null, null);
+        Book book = mock(Book.class);
+        when(book.getId()).thenReturn(commonId);
+        when(bookService.getOrCreateBook(row.getTitle(), row.getAuthor(), row.getIsbn())).thenReturn(book);
+
+        csvRowImportService.processRow(commonId, row);
+
+        verify(bookService).addUserBook(commonId, commonId, "2023", expectedStatus, row.getRating());
+    }
+
+    @Test
+    public void testProcessRowThrowsExceptionForUnknownReadingStatus() {
+        setRowFields("Dune", "Frank Herbert", "123", "some-unknown-status", "2023-05-01", 4.5, null, null);
+        Book book = mock(Book.class);
+        when(book.getId()).thenReturn(commonId);
+        when(bookService.getOrCreateBook(row.getTitle(), row.getAuthor(), row.getIsbn())).thenReturn(book);
+
+        assertThrows(IllegalArgumentException.class, () -> csvRowImportService.processRow(commonId, row));
+    }
+
+    @Test
+    public void testProcessRowHandlesNullDateReadAsNullYearRead() {
+        setRowFields("Dune", "Frank Herbert", "123", "to-read", null, 4.5, null, null);
+        Book book = mock(Book.class);
+        when(book.getId()).thenReturn(commonId);
+        when(bookService.getOrCreateBook(row.getTitle(), row.getAuthor(), row.getIsbn())).thenReturn(book);
+
+        csvRowImportService.processRow(commonId, row);
+
+        verify(bookService).addUserBook(commonId, commonId, null, ReadingStatus.TO_READ, row.getRating());
+    }
+
+    @Test
+    public void testProcessRowSkipsMoodAndPaceTagsWhenBlank() {
+        setRowFields("Dune", "Frank Herbert", "123", "read", "2023-05-01", 4.5, "  ", "");
+        Book book = mock(Book.class);
+        when(book.getId()).thenReturn(commonId);
+        when(bookService.getOrCreateBook(row.getTitle(), row.getAuthor(), row.getIsbn())).thenReturn(book);
+
+        csvRowImportService.processRow(commonId, row);
+
+        verifyNoInteractions(tagService);
+    }
+
+    @Test
+    public void testProcessRowCreatesOnlyPaceTagWhenMoodsAreMissing() {
+        setRowFields("Dune", "Frank Herbert", "123", "read", "2023-05-01", 4.5, null, "slow");
+        Book book = mock(Book.class);
+        Tag paceTag = mock(Tag.class);
+        BookTag bookTag = mock(BookTag.class);
+        when(book.getId()).thenReturn(commonId);
+        when(paceTag.getId()).thenReturn(commonId);
+        when(bookService.getOrCreateBook(row.getTitle(), row.getAuthor(), row.getIsbn())).thenReturn(book);
+        when(tagService.getOrCreateTag(commonId, "slow", TagType.PACE)).thenReturn(paceTag);
+        when(tagService.createBookTag(commonId, commonId, commonId)).thenReturn(bookTag);
+
+        csvRowImportService.processRow(commonId, row);
+
+        verify(tagService, times(1)).getOrCreateTag(commonId, "slow", TagType.PACE);
+        verify(tagService, never()).getOrCreateTag(anyInt(), anyString(), eq(TagType.MOOD));
+        verify(tagService, times(1)).createBookTag(commonId, commonId, commonId);
     }
 
     private void setRowFields(String title, String author, String isbn, String status, String dateRead,

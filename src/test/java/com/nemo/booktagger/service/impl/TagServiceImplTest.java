@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -272,5 +273,55 @@ public class TagServiceImplTest {
                 user.getId(), book.getId(), tag.getId()
         );
         verify(bookTagRepository, times(1)).save(any(BookTag.class));
+    }
+
+    @Test
+    public void testGetOrCreateTagReturnsExistingTagWithoutCreatingNewOne() {
+        when(tagRepository.findByUser_IdAndTagNameAndTagType(user.getId(), tagName, tag.getTagType()))
+                .thenReturn(Optional.of(tag));
+
+        Tag result = tagService.getOrCreateTag(user.getId(), tagName, tag.getTagType());
+
+        assertSame(tag, result, "Existing tag should be returned");
+        verify(tagRepository, times(1)).findByUser_IdAndTagNameAndTagType(user.getId(), tagName, tag.getTagType());
+        verify(userRepository, never()).getReferenceById(any());
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    public void testGetOrCreateTagCreatesNewTagWhenNoneExists() {
+        when(tagRepository.findByUser_IdAndTagNameAndTagType(user.getId(), tagName, tag.getTagType()))
+                .thenReturn(Optional.empty());
+        when(userRepository.getReferenceById(user.getId())).thenReturn(user);
+        when(tagRepository.save(any(Tag.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Tag result = tagService.getOrCreateTag(user.getId(), tagName, tag.getTagType());
+
+        assertNotNull(result, "A new tag should be created and returned");
+        assertEquals(tagName, result.getTagName());
+        assertEquals(tag.getTagType(), result.getTagType());
+        assertEquals(user, result.getUser());
+        verify(userRepository, times(1)).getReferenceById(user.getId());
+        verify(tagRepository, times(1)).save(any(Tag.class));
+    }
+
+    @Test
+    public void testGetDistinctTagTypesMapsEnumsToDisplayNames() {
+        when(tagRepository.findDistinctTagTypes(user.getId()))
+                .thenReturn(List.of(TagType.MOOD, TagType.PACE, TagType.CUSTOM));
+
+        List<String> result = tagService.getDistinctTagTypes(user.getId());
+
+        assertEquals(List.of("Mood", "Pace", "Custom"), result, "Tag types should be mapped to display names");
+        verify(tagRepository, times(1)).findDistinctTagTypes(user.getId());
+    }
+
+    @Test
+    public void testGetDistinctTagTypesReturnsEmptyListWhenUserHasNoTags() {
+        when(tagRepository.findDistinctTagTypes(user.getId())).thenReturn(List.of());
+
+        List<String> result = tagService.getDistinctTagTypes(user.getId());
+
+        assertTrue(result.isEmpty(), "Result should be empty when user has no tags");
     }
 }
