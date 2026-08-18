@@ -10,6 +10,8 @@ import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
 import com.nemo.booktagger.event.EnrichBookEvent;
+import com.nemo.booktagger.exception.DuplicateResourceException;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.service.BookService;
 import com.nemo.booktagger.service.UserLibraryCacheService;
@@ -50,7 +52,7 @@ public class BookServiceImpl implements BookService {
         }
         if((isbn != null && !isbn.isBlank() && bookRepository.existsByIsbn(isbn)) ||
             bookRepository.existsByTitleAndAuthor(title, author)) {
-            throw new RuntimeException("Book already exists");
+            throw new DuplicateResourceException("Book already exists");
         }
 
         Book book = new Book(
@@ -111,7 +113,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public Book getBookById(Integer bookId) {
         return bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
     }
 
     @Override
@@ -126,7 +128,7 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.getReferenceById(bookId);
 
         if(userBookRepository.existsByUser_IdAndBook_Id(userId, bookId)) {
-            throw new RuntimeException("Book already in user's library");
+            throw new DuplicateResourceException("Book already in user's library");
         }
 
         UserBook userBook = new UserBook();

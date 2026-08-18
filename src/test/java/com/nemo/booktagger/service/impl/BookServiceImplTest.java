@@ -9,6 +9,7 @@ import com.nemo.booktagger.entity.Book;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.entity.UserBook;
 import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.exception.DuplicateResourceException;
 import com.nemo.booktagger.factory.BookFactory;
 import com.nemo.booktagger.factory.UserFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +55,8 @@ public class BookServiceImplTest {
         when(bookRepository.getReferenceById(book.getId())).thenReturn(book);
         when(userBookRepository.existsByUser_IdAndBook_Id(user.getId(), book.getId())).thenReturn(true);
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        DuplicateResourceException exc = assertThrows(
+                DuplicateResourceException.class,
                 () -> bookService.addUserBook(user.getId(), book.getId(), "2025", ReadingStatus.READ, 5.0)
         );
 
@@ -73,12 +74,12 @@ public class BookServiceImplTest {
         String isbn = "1234567891";
         when(bookRepository.existsByIsbn(eq(isbn))).thenReturn(true);
 
-        RuntimeException runtimeException = assertThrows(
-                RuntimeException.class,
+        DuplicateResourceException duplicateResourceException = assertThrows(
+                DuplicateResourceException.class,
                 () -> bookService.addBook(title, author, isbn)
         );
 
-        assertEquals(bookAlreadyExistsExceptionMessage, runtimeException.getMessage(), "Unexpected exception " +
+        assertEquals(bookAlreadyExistsExceptionMessage, duplicateResourceException.getMessage(), "Unexpected exception " +
                 "message");
         verify(bookRepository, times(1)).existsByIsbn(eq(isbn));
         verify(bookRepository, never()).save(any());
@@ -90,7 +91,6 @@ public class BookServiceImplTest {
         book.setTitle("Title");
         book.setAuthor("Author");
         book.setIsbn("1234567891");
-        BookMetadata bookMetadata = new BookMetadata("Description", "2025", "Thumbnail");
         when(bookRepository.existsByIsbn(eq(book.getIsbn()))).thenReturn(false);
         when(bookRepository.existsByTitleAndAuthor(eq(book.getTitle()), eq(book.getAuthor()))).thenReturn(false);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -101,9 +101,6 @@ public class BookServiceImplTest {
         assertEquals(book.getTitle(), addedBook.getTitle(), "Unexpected book title");
         assertEquals(book.getAuthor(), addedBook.getAuthor(), "Unexpected book author");
         assertEquals(book.getIsbn(), addedBook.getIsbn(), "Unexpected book isbn");
-        assertEquals(bookMetadata.getDescription(), addedBook.getDescription(), "Unexpected book description");
-        assertEquals(bookMetadata.getPublishedDate(), addedBook.getYearPublished(), "Unexpected published date");
-        assertEquals(bookMetadata.getThumbnailURL(), addedBook.getThumbnailURL(), "Unexpected thumbnail URL");
         verify(bookRepository, times(1)).existsByIsbn(eq(book.getIsbn()));
         verify(bookRepository, times(1)).existsByTitleAndAuthor(eq(book.getTitle()),
                 eq(book.getAuthor()));

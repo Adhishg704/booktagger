@@ -2,6 +2,7 @@ package com.nemo.booktagger.service.impl;
 
 import com.nemo.booktagger.dao.repository.AiEmbeddedBookRepository;
 import com.nemo.booktagger.entity.AiEmbeddedBook;
+import com.nemo.booktagger.exception.DuplicateResourceException;
 import com.nemo.booktagger.service.AiEmbeddedBookService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class AiEmbeddedBookServiceImpl implements AiEmbeddedBookService {
     @Transactional
     public AiEmbeddedBook save(AiEmbeddedBook embeddedBook) {
         if(aiEmbeddedBookRepository.existsByBook_Id(embeddedBook.getBook().getId())) {
-            throw new RuntimeException("Book already exists");
+            throw new DuplicateResourceException("Book already exists");
         }
         return aiEmbeddedBookRepository.save(embeddedBook);
     }

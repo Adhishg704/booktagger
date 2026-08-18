@@ -10,6 +10,8 @@ import com.nemo.booktagger.service.StoryGraphBookCsvRow;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,6 +24,8 @@ import java.util.List;
 
 @Service
 public class CsvImportServiceImpl implements CsvImportService {
+    private static final Logger log = LoggerFactory.getLogger(CsvImportServiceImpl.class);
+
     private final CsvRowImportService csvRowImportService;
     private final StorageService storageService;
     private final JobService jobService;
@@ -43,6 +47,7 @@ public class CsvImportServiceImpl implements CsvImportService {
         try {
             processImport(job, jobEvent.fileKey());
         } catch (Exception e) {
+            log.error("CSV import failed for job {}", job.getId(), e);
             jobService.markFailed(
                     job.getId()
             );

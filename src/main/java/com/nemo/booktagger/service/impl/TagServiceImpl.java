@@ -9,8 +9,10 @@ import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.TagType;
+import com.nemo.booktagger.exception.DuplicateResourceException;
+import com.nemo.booktagger.exception.InvalidRequestException;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.service.TagService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag createTag(Integer userId, String tagName, TagType tagType) {
         if(tagRepository.existsByUser_IdAndTagNameAndTagType(userId, tagName, tagType)) {
-            throw new RuntimeException("Tag already exists");
+            throw new DuplicateResourceException("Tag already exists");
         }
 
         Tag tag = new Tag();
@@ -70,7 +72,7 @@ public class TagServiceImpl implements TagService {
         Tag tag = tagRepository.getReferenceById(tagId);
 
         if(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(userId, bookId, tagId)) {
-            throw new RuntimeException("Tag already applied to user book");
+            throw new DuplicateResourceException("Tag already applied to user book");
         }
 
         BookTag bookTag = new BookTag();
@@ -90,11 +92,11 @@ public class TagServiceImpl implements TagService {
         TagType tagType = tag.getTagType();
 
         if(!tagType.equals(TagType.CUSTOM)) {
-            throw new RuntimeException("Can only rename custom tags");
+            throw new InvalidRequestException("Can only rename custom tags");
         }
 
         if(tagRepository.existsByUser_IdAndTagNameAndTagType(userId, newName, tagType)) {
-            throw new RuntimeException("Tag with this name already exists");
+            throw new DuplicateResourceException("Tag with this name already exists");
         }
 
         tag.setTagName(newName);
@@ -110,7 +112,7 @@ public class TagServiceImpl implements TagService {
         TagType tagType = tag.getTagType();
 
         if(!tagType.equals(TagType.CUSTOM)) {
-            throw new RuntimeException("Can only delete custom tags");
+            throw new InvalidRequestException("Can only delete custom tags");
         }
 
         tagRepository.delete(tag);
@@ -131,7 +133,7 @@ public class TagServiceImpl implements TagService {
         };
     }
 
-    private EntityNotFoundException tagNotFound(Integer tagId) {
-        return new EntityNotFoundException("Tag with tag id " + tagId + " not found");
+    private ResourceNotFoundException tagNotFound(Integer tagId) {
+        return new ResourceNotFoundException("Tag with tag id " + tagId + " not found");
     }
 }

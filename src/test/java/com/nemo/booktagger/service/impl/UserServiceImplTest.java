@@ -4,7 +4,9 @@ import com.nemo.booktagger.dao.repository.UserBookRepository;
 import com.nemo.booktagger.dao.repository.UserRepository;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.ReadingStatus;
-import jakarta.persistence.EntityNotFoundException;
+import com.nemo.booktagger.exception.DuplicateResourceException;
+import com.nemo.booktagger.exception.InvalidRequestException;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +60,7 @@ public class UserServiceImplTest {
     public void testGetUserByIdThrowsExceptionForNonExistingUser() {
         when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> {
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> {
             userService.getUserById(nonExistingId);
         });
         assertEquals(userNotFoundExceptionMessage, ex.getMessage(),
@@ -81,7 +83,7 @@ public class UserServiceImplTest {
     public void testGetUsernameByIdThrowsExceptionForNonExistingUser() {
         when(userRepository.findUsernameById(nonExistingId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> {
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> {
             userService.getUserNameById(nonExistingId);
         });
         assertEquals(userNotFoundExceptionMessage, ex.getMessage(), "Unexpected exception message");
@@ -105,8 +107,8 @@ public class UserServiceImplTest {
         when(userRepository.findEmailById(nonExistingId))
                 .thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(
-                EntityNotFoundException.class,
+        ResourceNotFoundException ex = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.getEmailById(nonExistingId)
         );
 
@@ -117,8 +119,8 @@ public class UserServiceImplTest {
     @ParameterizedTest
     @ValueSource(strings = { "abcd", "abcd$$%" })
     public void testUpdateUserNamethrowsExceptionForInvalidUsername(String invalidUsername) {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        InvalidRequestException ex = assertThrows(
+                InvalidRequestException.class,
                 () -> userService.updateUserName(userId, invalidUsername)
         );
 
@@ -134,8 +136,8 @@ public class UserServiceImplTest {
     public void testUpdateUsernameThrowsExceptionForExistingUserName() {
         when(userRepository.existsByUsername(user.getUsername())).thenReturn(true);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> userService.updateUserName(userId, user.getUsername())
         );
 
@@ -152,8 +154,8 @@ public class UserServiceImplTest {
         when(userRepository.existsByUsername(newUsername)).thenReturn(false);
         when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(
-                EntityNotFoundException.class,
+        ResourceNotFoundException ex = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.updateUserName(nonExistingId, newUsername)
         );
 
@@ -193,8 +195,8 @@ public class UserServiceImplTest {
             "abcd$%*@example.com"   // invalid characters
     })
     public void testUpdateEmailthrowsExceptionForInvalidEmail(String invalidEmail) {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        InvalidRequestException ex = assertThrows(
+                InvalidRequestException.class,
                 () -> userService.updateEmail(userId, invalidEmail)
         );
 
@@ -210,8 +212,8 @@ public class UserServiceImplTest {
     public void testUpdateEmailThrowsExceptionForExistingEmail() {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> userService.updateEmail(userId, user.getEmail())
         );
 
@@ -240,8 +242,8 @@ public class UserServiceImplTest {
     public void testDeleteUserThrowsExceptionForNonExistingUser() {
         when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(
-                EntityNotFoundException.class,
+        ResourceNotFoundException ex = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.deleteUser(nonExistingId)
         );
 

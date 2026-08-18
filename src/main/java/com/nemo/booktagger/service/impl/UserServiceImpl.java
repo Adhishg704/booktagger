@@ -4,8 +4,10 @@ import com.nemo.booktagger.dao.repository.UserBookRepository;
 import com.nemo.booktagger.dao.repository.UserRepository;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.ReadingStatus;
+import com.nemo.booktagger.exception.DuplicateResourceException;
+import com.nemo.booktagger.exception.InvalidRequestException;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -42,10 +44,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User createUser(String username, String email) {
         if(!isUsernameValid(username)) {
-            throw new IllegalArgumentException("Username is not valid");
+            throw new InvalidRequestException("Username is not valid");
         }
         if(!isEmailValid(email)) {
-            throw new IllegalArgumentException("Email is not valid");
+            throw new InvalidRequestException("Email is not valid");
         }
 
         User user = new User();
@@ -61,11 +63,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUserName(Integer userId, String newUsername) {
         if(!isUsernameValid(newUsername)) {
-            throw new IllegalArgumentException("Username must be at least 6 characters and contain only letters, " +
+            throw new InvalidRequestException("Username must be at least 6 characters and contain only letters, " +
                     "numbers, or underscores");
         }
         if(userRepository.existsByUsername(newUsername)) {
-            throw new IllegalArgumentException("Username is already taken");
+            throw new DuplicateResourceException("Username is already taken");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> userNotFound(userId));
@@ -77,10 +79,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateEmail(Integer userId, String newEmail) {
         if(!isEmailValid(newEmail)) {
-            throw new IllegalArgumentException("Invalid email");
+            throw new InvalidRequestException("Invalid email");
         }
         if(userRepository.existsByEmail(newEmail)) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> userNotFound(userId));
@@ -116,8 +118,8 @@ public class UserServiceImpl implements UserService {
         return userBookRepository.countByUser_IdAndStatusAndYearRead(userId, status, year);
     }
 
-    private EntityNotFoundException userNotFound(Integer userId) {
-        return new EntityNotFoundException("User id " + userId + " not found");
+    private ResourceNotFoundException userNotFound(Integer userId) {
+        return new ResourceNotFoundException("User id " + userId + " not found");
     }
 
     private boolean isUsernameValid(String newUsername) {

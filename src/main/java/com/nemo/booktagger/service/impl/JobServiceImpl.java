@@ -3,6 +3,7 @@ package com.nemo.booktagger.service.impl;
 import com.nemo.booktagger.dao.repository.JobRepository;
 import com.nemo.booktagger.entity.Job;
 import com.nemo.booktagger.enums.JobStatus;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.service.JobService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class JobServiceImpl implements JobService {
     public Job getJob(int jobId) {
         return jobRepository.findById(jobId)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Job with id " + jobId + " has not been created"
                         ));
     }

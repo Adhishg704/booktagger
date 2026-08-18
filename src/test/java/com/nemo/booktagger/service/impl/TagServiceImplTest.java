@@ -9,6 +9,9 @@ import com.nemo.booktagger.entity.BookTag;
 import com.nemo.booktagger.entity.Tag;
 import com.nemo.booktagger.entity.User;
 import com.nemo.booktagger.enums.TagType;
+import com.nemo.booktagger.exception.DuplicateResourceException;
+import com.nemo.booktagger.exception.InvalidRequestException;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.factory.BookFactory;
 import com.nemo.booktagger.factory.BookTagFactory;
 import com.nemo.booktagger.factory.TagFactory;
@@ -61,8 +64,8 @@ public class TagServiceImplTest {
         when(tagRepository.existsByUser_IdAndTagNameAndTagType(user.getId(), tag.getTagName(), tag.getTagType()))
                 .thenReturn(true);
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        DuplicateResourceException exc = assertThrows(
+                DuplicateResourceException.class,
                 () -> tagService.createTag(user.getId(), tag.getTagName(), tag.getTagType())
         );
 
@@ -102,8 +105,8 @@ public class TagServiceImplTest {
         String oldTagName = tag.getTagName();
         when(tagRepository.findByIdAndUser_Id(nonExistingId, user.getId())).thenReturn(Optional.empty());
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        ResourceNotFoundException exc = assertThrows(
+                ResourceNotFoundException.class,
                 () -> tagService.renameCustomTag(user.getId(), nonExistingId, "NewTagName")
         );
 
@@ -120,8 +123,8 @@ public class TagServiceImplTest {
         tag.setTagType(TagType.MOOD);
         when(tagRepository.findByIdAndUser_Id(tag.getId(), user.getId())).thenReturn(Optional.of(tag));
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        InvalidRequestException exc = assertThrows(
+                InvalidRequestException.class,
                 () -> tagService.renameCustomTag(user.getId(), tag.getId(), "NewTagName")
         );
 
@@ -140,8 +143,8 @@ public class TagServiceImplTest {
         when(tagRepository.findByIdAndUser_Id(tag.getId(), user.getId())).thenReturn(Optional.of(tag));
         when(tagRepository.existsByUser_IdAndTagNameAndTagType(user.getId(), newTagName, tag.getTagType())).thenReturn(true);
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        DuplicateResourceException exc = assertThrows(
+                DuplicateResourceException.class,
                 () -> tagService.renameCustomTag(user.getId(), tag.getId(), newTagName)
         );
 
@@ -177,8 +180,8 @@ public class TagServiceImplTest {
         when(tagRepository.findByIdAndUser_Id(nonExistingId, user.getId()))
                 .thenReturn(Optional.empty());
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        ResourceNotFoundException exc = assertThrows(
+                ResourceNotFoundException.class,
                 () -> tagService.deleteCustomTag(user.getId(), nonExistingId)
         );
 
@@ -196,8 +199,8 @@ public class TagServiceImplTest {
         when(tagRepository.findByIdAndUser_Id(tag.getId(), user.getId()))
                 .thenReturn(Optional.of(tag));
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        InvalidRequestException exc = assertThrows(
+                InvalidRequestException.class,
                 () -> tagService.deleteCustomTag(user.getId(), tag.getId())
         );
 
@@ -231,8 +234,8 @@ public class TagServiceImplTest {
         when(tagRepository.getReferenceById(tag.getId())).thenReturn(tag);
         when(bookTagRepository.existsByUser_IdAndBook_IdAndTag_Id(user.getId(), book.getId(), tag.getId())).thenReturn(true);
 
-        RuntimeException exc = assertThrows(
-                RuntimeException.class,
+        DuplicateResourceException exc = assertThrows(
+                DuplicateResourceException.class,
                 () -> tagService.createBookTag(user.getId(), book.getId(), tag.getId())
         );
 

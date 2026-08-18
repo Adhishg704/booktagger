@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nemo.booktagger.entity.AiEmbeddedBook;
 import com.nemo.booktagger.event.EmbeddingJobEvent;
+import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.rest.dto.request.GeminiEnrichmentInput;
 import com.nemo.booktagger.rest.dto.response.ai.EnrichedBook;
 import com.nemo.booktagger.rest.dto.response.common.UserBookDetailedResponse;
@@ -326,12 +327,8 @@ public class AiEnrichmentServiceImpl implements AiEnrichmentService {
 
     @Override
     public String getReasonForRecommendationFromAI(Integer userId, Integer bookId, String userInput) {
-        AiEmbeddedBook aiEmbeddedBook =
-                aiEmbeddedBookService.getAiEmbeddedBook(bookId).orElse(null);
-
-        if (aiEmbeddedBook == null) {
-            return "Book not found in library";
-        }
+        AiEmbeddedBook aiEmbeddedBook = aiEmbeddedBookService.getAiEmbeddedBook(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found in library"));
 
         EnrichedBook enrichedBook = createEnrichedBookFromAiEmbeddedBook(aiEmbeddedBook);
         String prompt = buildExplanationPrompt(userInput, enrichedBook);
