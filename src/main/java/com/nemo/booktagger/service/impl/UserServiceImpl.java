@@ -9,6 +9,9 @@ import com.nemo.booktagger.exception.InvalidRequestException;
 import com.nemo.booktagger.exception.ResourceNotFoundException;
 import com.nemo.booktagger.service.UserService;
 import jakarta.transaction.Transactional;
+
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User createUser(String username, String email) {
+    public User createUser(String username, String email, String password) {
         if(!isUsernameValid(username)) {
             throw new InvalidRequestException("Username is not valid");
         }
@@ -53,6 +56,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
+        user.setPassword(password); // Assuming password is already hashed before being passed to this method
 
         userRepository.save(user);
 
@@ -137,5 +141,20 @@ public class UserServiceImpl implements UserService {
         String regex =
                 "^(?!.*\\.\\.)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
         return newEmail.matches(regex);
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean isEmailTaken(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Optional<User> getUserByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
     }
 }
