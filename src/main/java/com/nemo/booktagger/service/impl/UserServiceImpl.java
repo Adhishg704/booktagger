@@ -46,17 +46,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(String username, String email, String password) {
-        if(!isUsernameValid(username)) {
-            throw new InvalidRequestException("Username is not valid");
-        }
-        if(!isEmailValid(email)) {
-            throw new InvalidRequestException("Email is not valid");
-        }
-
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(password); // Assuming password is already hashed before being passed to this method
+        user.setPassword(password);
 
         userRepository.save(user);
 

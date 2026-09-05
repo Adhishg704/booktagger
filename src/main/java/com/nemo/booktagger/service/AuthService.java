@@ -6,5 +6,5 @@ import com.nemo.booktagger.rest.dto.request.SignupRequest;
 public interface AuthService {
     void signup(SignupRequest signupRequest);
 
-    void login(LoginRequest loginRequest);
+    String login(LoginRequest loginRequest);
 }

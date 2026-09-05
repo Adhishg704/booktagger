@@ -38,7 +38,7 @@ public class CsvImportIntegrationTest {
 
     @Test
     public void testBooksImportedFromCsvIntoDb() throws IOException {
-        User user = userService.createUser("user123", "user1239o3@gmail.com");
+        User user = userService.createUser("user123", "user1239o3@gmail.com", "password123");
         Job job = jobService.createJob(STORYGRAPH_ROWS, user.getId());
 
         ClassPathResource resource = new ClassPathResource("Storygraph_library.csv");

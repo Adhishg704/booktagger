@@ -10,6 +10,7 @@ import com.nemo.booktagger.exception.DuplicateResourceException;
 import com.nemo.booktagger.exception.InvalidCredentialsException;
 import com.nemo.booktagger.rest.dto.request.LoginRequest;
 import com.nemo.booktagger.rest.dto.request.SignupRequest;
+import com.nemo.booktagger.security.JwtService;
 import com.nemo.booktagger.service.AuthService;
 import com.nemo.booktagger.service.UserService;
 
@@ -18,10 +19,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -43,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void login(LoginRequest loginRequest) {
+    public String login(LoginRequest loginRequest) {
         String usernameOrEmail = loginRequest.usernameOrEmail();
         String password = loginRequest.password();
 
@@ -52,5 +55,7 @@ public class AuthServiceImpl implements AuthService {
         if (user.isEmpty() || !passwordEncoder.matches(password, user.get().getPassword())) {
             throw new InvalidCredentialsException("Invalid username/email or password");
         }
+
+        return jwtService.generateAccessToken(user.get().getId(), user.get().getUsername());
     }
 }

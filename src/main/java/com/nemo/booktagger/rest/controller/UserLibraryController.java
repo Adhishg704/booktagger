@@ -3,7 +3,9 @@ package com.nemo.booktagger.rest.controller;
 import com.nemo.booktagger.enums.TagType;
 import com.nemo.booktagger.enums.YearType;
 import com.nemo.booktagger.rest.dto.response.common.UserBookDetailedResponse;
+import com.nemo.booktagger.security.AuthenticatedUserService;
 import com.nemo.booktagger.service.UserLibraryService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,55 +17,60 @@ import java.util.List;
 @RequestMapping("/api/v1/library")
 public class UserLibraryController {
 
+    private final AuthenticatedUserService authenticatedUserService;
     private final UserLibraryService userLibraryService;
 
-    public UserLibraryController(UserLibraryService userLibraryService) {
+    public UserLibraryController(AuthenticatedUserService authenticatedUserService, UserLibraryService userLibraryService) {
+        this.authenticatedUserService = authenticatedUserService;
         this.userLibraryService = userLibraryService;
     }
 
-    @GetMapping("/{userId}/years-read")
-    public List<String> getYearsRead(
-            @PathVariable("userId") Integer userId
-    ) {
+    @GetMapping("/years-read")
+    public List<String> getYearsRead() {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getYearsReadForUser(userId);
     }
 
-    @GetMapping("/{userId}/years-published")
-    public List<String> getYearsPublished(
-            @PathVariable("userId") Integer userId
-    ) {
+    @GetMapping("/years-published")
+    public List<String> getYearsPublished() {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getYearsPublishedForUser(userId);
     }
 
-    @GetMapping("/{userId}/books/year/{yearType}/{year}")
+    @GetMapping("/books/year/{yearType}/{year}")
     public List<UserBookDetailedResponse> getUserBooksByYear(
-            @PathVariable("userId") Integer userId,
             @PathVariable("yearType") YearType yearType,
             @PathVariable("year") String year
     ) {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getUserBooksByYear(userId, yearType, year);
     }
 
-    @GetMapping("/{userId}/tag-types")
-    public List<String> getTagTypes(
-            @PathVariable("userId") Integer userId
-    ) {
+    @GetMapping("/tag-types")
+    public List<String> getTagTypes() {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getTagTypesForUser(userId);
     }
 
-    @GetMapping("/{userId}/tag-names/{tagType}")
+    @GetMapping("/tag-names/{tagType}")
     public List<String> getTagNamesForType(
-            @PathVariable("userId") Integer userId,
             @PathVariable("tagType") TagType tagType
     ) {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getTagNamesForUserForTagType(userId, tagType);
     }
 
-    @GetMapping("/{userId}/books/tag/{tagName}")
+    @GetMapping("/books/tag/{tagName}")
     public List<UserBookDetailedResponse> getUserBooksByTagName(
-            @PathVariable("userId") Integer userId,
             @PathVariable("tagName") String tagName
     ) {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+
         return userLibraryService.getUserBooksByTagName(userId, tagName);
     }
 }
