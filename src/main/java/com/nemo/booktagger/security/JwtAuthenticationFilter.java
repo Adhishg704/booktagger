@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if(token == null || token.isBlank()) {
-            filterChain.doFilter(request, response);
+            sendUnauthorized(response, "Authentication token is missing");
             return;
         }
 
@@ -59,16 +59,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .setAuthentication(authentication);
         }
         catch (JwtException | IllegalArgumentException e) {
+            System.out.println("JWT validation failed: " + e.getClass().getSimpleName());
             SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("""
-                {"error":"Invalid JWT token"}
-            """);
+            sendUnauthorized(response, "Invalid or expired JWT token");
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendUnauthorized(
+        HttpServletResponse response,
+        String message
+    ) throws IOException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write(
+            "{\"error\":\"" + message + "\"}"
+        );
     }
 
 }

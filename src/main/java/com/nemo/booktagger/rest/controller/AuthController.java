@@ -1,10 +1,12 @@
 package com.nemo.booktagger.rest.controller;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nemo.booktagger.rest.dto.request.LoginRequest;
 import com.nemo.booktagger.rest.dto.request.SignupRequest;
+import com.nemo.booktagger.security.AuthenticatedUserService;
 import com.nemo.booktagger.service.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,16 +25,18 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, AuthenticatedUserService authenticatedUserService) {
         this.authService = authService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(
+    public ResponseEntity<Void> signup(
         @Valid @RequestBody SignupRequest signupRequest) {
         authService.signup(signupRequest);
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
@@ -52,4 +57,14 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }    
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Integer>> getCurrentUser() {
+        Integer userId = authenticatedUserService.getAuthenticatedUserId();
+        return ResponseEntity.ok(
+            Map.of(
+            "userId", 
+                userId)
+            );
+    }
 }
