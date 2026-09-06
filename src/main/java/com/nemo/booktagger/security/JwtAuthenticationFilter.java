@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if(token == null || token.isBlank()) {
-            sendUnauthorized(response, "Authentication token is missing");
+            filterChain.doFilter(request, response);
             return;
         }
 
