@@ -1,5 +1,9 @@
 package com.nemo.booktagger.rest.controller;
 
+import java.time.Duration;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nemo.booktagger.rest.dto.request.LoginRequest;
 import com.nemo.booktagger.rest.dto.request.SignupRequest;
-import com.nemo.booktagger.rest.dto.response.auth.AuthResponse;
 import com.nemo.booktagger.service.AuthService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -31,9 +35,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(
-        @Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Void> login(
+        @Valid @RequestBody LoginRequest loginRequest,
+        HttpServletResponse response) {
         String token = authService.login(loginRequest);
-        return ResponseEntity.ok(new AuthResponse(token));
+
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+            .httpOnly(true)
+            .secure(false)
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(Duration.ofMinutes(15))
+            .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok().build();
     }    
 }
