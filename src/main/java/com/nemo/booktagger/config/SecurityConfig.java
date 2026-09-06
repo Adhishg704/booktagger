@@ -46,8 +46,8 @@ public class SecurityConfig {
                     response.getWriter().write("""
                         {"error":"Authentication required"}
                     """);
-            })
-)
+                })
+            )
 
             .addFilterBefore(
                 jwtAuthenticationFilter, 
